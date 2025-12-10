@@ -7,6 +7,7 @@ import gymnasium as gym
 from gymnasium import spaces
 
 import utils.entity
+import utils.entity_lite
 
 class CircleWorldEnv(gym.Env):
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 4}
@@ -23,3 +24,4 @@ class CircleWorldEnv(gym.Env):
                 "dist_wolf": spaces.Box(0, 2*radius, shape=(1,), dtype=np.float64),
             }
         )
+        

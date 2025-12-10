@@ -1,45 +1,41 @@
 import numpy as np
 
-class Entity:
-    def __init__(self, pos=None, direction=0.0):
+class EntityLite:
+    def __init__(self, pos=None):
         """
         pos: initial position [x, y], as an np.array
         direction: angle in degrees, 0 = positive x-axis
         """
         self.pos = np.array(pos if pos is not None else [0.0, 0.0], dtype=np.float64)
 
-    # --- Utilities ---
-    @property
-    def direction_rad(self):
-        return np.radians(self.direction)
-
-    def _normalize_dir(self):
-        self.direction %= 360.0
-
-    # --- Direction ---
-    def set_direction(self, direction):
-        self.direction = direction % 360.0
-
-    def rotate(self, direction):
-        self.direction = (self.direction + direction) % 360.0
-
     # --- Move ---
-    def forward(self, distance):
-        """
-        Move forward in the current direction.
-        distance: distance to move
-        """
-        delta = np.array([np.cos(self.direction_rad), np.sin(self.direction_rad)]) * distance
-        self.pos += delta
-
     def move(self, distance, direction):
         """
         Move in the specify direction.
         distance: distance to move
         direction: direction of movement (absolute)
         """
-        delta = np.array([np.cos(np.radians(direction)), np.sin(self.direction_rad)]) * distance
+        delta = np.array([np.cos(np.radians(direction)), np.sin(np.radians(direction))]) * distance
         self.pos += delta
+
+    def move_vector(self, ax, ay, max_distance):
+        norm = np.sqrt(ax**2 + ay**2)
+        if norm < 1e-6:
+            return  # vecteur nul → ne bouge pas
+
+        # Normalisation si nécessaire
+        if norm > 1.0:
+            ax /= norm
+            ay /= norm
+            norm = 1.0
+
+        distance = norm * max_distance
+        angle = np.arctan2(ay, ax)  # radians
+        self.direction = np.degrees(angle) % 360  # mettre à jour la direction du canard
+
+        delta = np.array([np.cos(angle), np.sin(angle)]) * distance
+        self.pos += delta
+
 
     def move_arc(self, length, radius):
         """

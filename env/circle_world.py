@@ -1,3 +1,7 @@
+# import sys
+# import os
+# sys.path.append(os.path.abspath("utils"))
+
 from enum import Enum
 
 import numpy as np
@@ -24,4 +28,7 @@ class CircleWorldEnv(gym.Env):
                 "dist_wolf": spaces.Box(0, 2*radius, shape=(1,), dtype=np.float64),
             }
         )
+
+        # self.duck = entity_lite.EntityLite()
+        
         

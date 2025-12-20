@@ -1,7 +1,3 @@
-# import sys
-# import os
-# sys.path.append(os.path.abspath("utils"))
-
 from enum import Enum
 
 import numpy as np
@@ -10,8 +6,7 @@ import pygame
 import gymnasium as gym
 from gymnasium import spaces
 
-import utils.entity
-import utils.entity_lite
+from utils.entity_lite import EntityLite
 
 class CircleWorldEnv(gym.Env):
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 4}
@@ -27,8 +22,8 @@ class CircleWorldEnv(gym.Env):
             }
         )
 
-        self.duck = entity_lite.EntityLite()
-        self.wolf = entity.Entity()
+        self.duck = EntityLite()
+        self.wolf = EntityLite()
 
         self.action_space = spaces.Box(
             low = -duck_speed,

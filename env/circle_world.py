@@ -24,7 +24,7 @@ class CircleWorldEnv(gym.Env):
             }
         )
 
-        self.duck = entity_lite.EntityLite()
+        self.duck = EntityLite()
         self.wolf = EntityLite()
 
         self.action_space = spaces.Box(

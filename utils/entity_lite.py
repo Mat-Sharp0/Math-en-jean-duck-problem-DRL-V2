@@ -53,3 +53,46 @@ class EntityLite:
         new_pos = center + rotation @ offset
 
         return new_pos
+    
+    def wolf_move(
+        self,
+        target_pos: np.ndarray,
+        center: np.ndarray,
+        radius: float,
+        max_step: float
+    ):
+        """
+        Déplace self.pos le long du cercle vers le point du cercle
+        le plus proche de A, par le plus court arc.
+        """
+
+        target_pos = np.array(target_pos, dtype=np.float64)
+        center = np.array(center, dtype=np.float64)
+
+        CA = target_pos - center
+        norm_CA = np.linalg.norm(CA)
+
+        if norm_CA < 1e-8:
+            return
+
+        target = center + radius * (CA / norm_CA)
+
+        def angle(p):
+            v = p - center
+            return np.arctan2(v[1], v[0])
+
+        angle_B = angle(self.pos)
+        angle_target = angle(target)
+
+        delta_angle = angle_target - angle_B
+        delta_angle = (delta_angle + np.pi) % (2 * np.pi) - np.pi
+
+        arc_remaining = delta_angle * radius
+
+        arc_step = np.clip(arc_remaining, -max_step, max_step)
+
+        self.pos = self.move_point_along_arc(
+            self.pos,
+            center,
+            arc_step
+        )

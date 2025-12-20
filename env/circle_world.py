@@ -16,9 +16,11 @@ import utils.entity_lite
 class CircleWorldEnv(gym.Env):
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 4}
 
-    def __init__(self, render_mode=None, radius=5, duck_speed=1):
+    def __init__(self, render_mode=None, radius=5, duck_speed=1, wolf_speed=2):
         self.radius = radius
         self.window_size = 512
+        self.duck_speed = duck_speed
+        self.wolf_speed = wolf_speed
 
         self.observation_space = spaces.Dict(
             {
@@ -28,11 +30,11 @@ class CircleWorldEnv(gym.Env):
         )
 
         self.duck = entity_lite.EntityLite()
-        self.wolf = entity.Entity()
+        self.wolf = entity_lite.Entity()
 
         self.action_space = spaces.Box(
-            low = -duck_speed,
-            high = duck_speed,
+            low = -self.duck_speed,
+            high = self.duck_speed,
             shape = (2,),
             dtype=np.float64
         )
@@ -70,5 +72,13 @@ class CircleWorldEnv(gym.Env):
 
         return observation, info
 
+    def step(self, action):
+        ax, ay = action
+
+        self.duck.move(ax=ax, ay=ay, max_distance=self.duck_speed)
+        self.wolf.wolf_move(self.duck.pos, np.array([0,0]), self.radius, self.wolf_speed)
+
+
+        
 
         

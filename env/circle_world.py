@@ -1,3 +1,11 @@
+try:
+    from utils.entity_lite import EntityLite
+except ModuleNotFoundError:
+    import sys
+    import os
+    sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    from utils.entity_lite import EntityLite
+
 from enum import Enum
 
 import numpy as np
@@ -5,8 +13,6 @@ import pygame
 
 import gymnasium as gym
 from gymnasium import spaces
-
-from utils.entity_lite import EntityLite
 
 class CircleWorldEnv(gym.Env):
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 4}

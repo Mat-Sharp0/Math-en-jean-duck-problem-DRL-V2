@@ -1,10 +1,10 @@
 try:
-    from utils.entity_lite import EntityLite
+    from utils.entity import Duck, Wolf
 except ModuleNotFoundError:
     import sys
     import os
     sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    from utils.entity_lite import EntityLite
+    from utils.entity import Duck, Wolf
 
 from enum import Enum
 
@@ -30,8 +30,8 @@ class CircleWorldEnv(gym.Env):
             }
         )
 
-        self.duck = EntityLite()
-        self.wolf = EntityLite()
+        self.duck = Duck()
+        self.wolf = Wolf()
 
         self.action_space = spaces.Box(
             low = -self.duck_speed,
@@ -79,7 +79,3 @@ class CircleWorldEnv(gym.Env):
         self.duck.move(ax=ax, ay=ay, max_distance=self.duck_speed)
         self.wolf.wolf_move(self.duck.pos, np.array([0,0]), self.radius, self.wolf_speed)
 
-
-        
-
-        

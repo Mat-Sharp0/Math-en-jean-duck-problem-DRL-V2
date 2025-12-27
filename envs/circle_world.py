@@ -29,7 +29,7 @@ class CircleWorldEnv(gym.Env):
         # State
         self.steps = 0
         self.duck = Duck()
-        self.wolf = Wolf(np.array([0.0, self.radius], dtype=np.float64))
+        self.wolf = Wolf(np.array([0.0, -self.radius], dtype=np.float64))
 
         # Spaces
         self.observation_space = spaces.Dict(
@@ -79,7 +79,7 @@ class CircleWorldEnv(gym.Env):
 
         self.steps = 0
         self.duck.pos = np.zeros(2, dtype=np.float32)
-        self.wolf.pos = np.array([0.0, self.radius], dtype=np.float64)
+        self.wolf.pos = np.array([0.0, -self.radius], dtype=np.float64)
 
         observation = self._get_obs()
         info = self._get_info()

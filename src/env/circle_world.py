@@ -2,7 +2,7 @@ import numpy as np
 import pygame
 import gymnasium as gym
 from gymnasium import spaces
-from utils.entity import Duck, Wolf
+from src.env.entity import Duck, Wolf
 
 
 class CircleWorldEnv(gym.Env):

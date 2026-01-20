@@ -1,4 +1,4 @@
-from enum import Enum
+import yaml
 
 import numpy as np
 from stable_baselines3 import PPO, TD3, SAC
@@ -9,11 +9,6 @@ from src.env.circle_world import CircleWorldEnv
 from src.env.wrappers.reward import DistanceRewardWrapper
 from src.env.wrappers.observation import RelativeObservationWrapper
 
-class Algo(Enum):
-    PPO = "PPO"
-    TD3 = "TD3"
-    SAC = "SAC"
-
 def make_env(render_mode=None, reward_scale:float=0.02):
     env = CircleWorldEnv(render_mode=render_mode)
     env = DistanceRewardWrapper(env, scale=reward_scale)
@@ -21,38 +16,34 @@ def make_env(render_mode=None, reward_scale:float=0.02):
     return env
 
 
-def train_model(
-    tensorboard_log:str,
-    model_path:str,
-    algo: Algo = Algo.PPO,
-    n_envs: int = 8,
-    total_timesteps: int = 500_000,
-    learning_rate: float = 3e-4,
-    gamma: float = 0.99,
-    n_steps: int = 2048,
-    batch_size: int = 64,
-    reward_scale: float = 0.02,
-    device: str = "cpu",
-    run_name: str = "run1",
-    render_mode=None,
-):
-    env = DummyVecEnv([make_env(render_mode=render_mode, reward_scale=reward_scale) for _ in range(n_envs)])
+def train_model(yaml_config_path:str):
+    
+    with open(yaml_config_path, 'r') as f:
+        config = yaml.load(f, Loader=yaml.FullLoader)
+    
+    env = DummyVecEnv([make_env(render_mode=config['render_mode'], reward_scale=config['hyperparameters']['reward_scale']) for _ in range(config['training']['n_envs'])])
     env = VecNormalize(env, norm_obs=True, norm_reward=True)
 
-    if algo == Algo.PPO:
+
+    if config['algo'] == 'PPO':
         model = PPO(
-            "MlpPolicy",
+            config['policy'],
             env,
-            learning_rate=learning_rate,
-            n_steps=n_steps,
-            batch_size=batch_size,
-            gamma=gamma,
-            verbose=1,
-            tensorboard_log=tensorboard_log,
-            device=device,
+            learning_rate=config['hyperparameters']['learning_rate'],
+            n_steps=config['hyperparameters']['n_steps'],
+            batch_size=config['hyperparameters']['batch_size'],
+            n_epochs=config['hyperparameters']['n_epochs'],
+            gae_lambda=config['hyperparameters']['gae_lambda'],
+            clip_range=config['hyperparameters']['clip_range'],
+            ent_coef=config['hyperparameters']['ent_coef'],
+            gamma=config['hyperparameters']['gamma'],
+            verbose=config['log']['verbose'],
+            tensorboard_log=config['log']['tensorboard_log'],
+            device=config['device'],
         )
 
-    elif algo == Algo.TD3:
+
+    elif config['algo'] == 'TD3':
         n_actions = env.action_space.shape[0]
         action_noise = NormalActionNoise(
             mean=np.zeros(n_actions),
@@ -60,33 +51,36 @@ def train_model(
         )
 
         model = TD3(
-            "MlpPolicy",
+            config['policy'],
             env,
-            learning_rate=learning_rate,
+            learning_rate=config['hyperparameters']['learning_rate'],
             batch_size=256,
             action_noise=action_noise,
             verbose=1,
-            tensorboard_log=tensorboard_log,
-            device=device,
+            tensorboard_log=config['log']['tensorboard_log'],
+            device=config['device'],
         )
 
-    elif algo == Algo.SAC:
+
+    elif config['algo'] == 'SAC':
         model = SAC(
-            "MlpPolicy",
+            config['policy'],
             env,
-            learning_rate=learning_rate,
+            learning_rate=config['hyperparameters']['learning_rate'],
             batch_size=256,
             verbose=1,
-            tensorboard_log=tensorboard_log,
-            device=device,
+            tensorboard_log=config['log']['tensorboard_log'],
+            device=config['device'],
         )
 
     else:
-        raise ValueError(f"Unsupported algorithm: {algo}")
+        raise ValueError(f"Unsupported algorithm: {config['algo']}")
+
 
     model.learn(
-        total_timesteps=total_timesteps,
-        tb_log_name=f"{algo.value}_{run_name}"
+        total_timesteps=config['training']['total_timesteps'],
+        tb_log_name=f"{config['algo']}_{config['run_name']}",
+        progress_bar=True
     )
 
-    model.save(f"{model_path}/{algo.value}_{run_name}")
+    model.save(f"{config['model_path']}/{config['algo']}_{config['run_name']}")

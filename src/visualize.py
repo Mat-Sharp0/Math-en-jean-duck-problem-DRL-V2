@@ -1,21 +1,14 @@
-from enum import Enum
-
 from src.env.circle_world import CircleWorldEnv
 from src.env.wrappers.reward import DistanceRewardWrapper
 from src.env.wrappers.observation import RelativeObservationWrapper
 from stable_baselines3 import PPO, TD3, SAC
 
-class Algo(Enum):
-    PPO = "PPO"
-    TD3 = "TD3"
-    SAC = "SAC"
-
-def visualize(algo:Algo, model_path:str, episodes=5):
-    if algo == Algo.PPO:
+def visualize(algo:str, model_path:str, episodes=5):
+    if algo == 'PPO':
         model = PPO.load(model_path)
-    elif algo == Algo.TD3:
+    elif algo == 'TD3':
         model = TD3.load(model_path)
-    elif algo == Algo.SAC:
+    elif algo == 'SAC':
         model = SAC.load(model_path)
     else:
         raise ValueError(f"Unsupported algorithm: {algo}")

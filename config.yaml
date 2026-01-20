@@ -1,0 +1,31 @@
+run_name: run1
+
+model_path: models\saved_model
+
+render_mode: None
+
+log:
+  verbose: 1
+  tensorboard_log: logs\tensorboard
+
+
+algo: 'PPO'
+
+policy: 'MlpPolicy'
+
+training:
+  total_timesteps: 5000
+  n_envs: 8
+
+device: cpu
+
+hyperparameters:
+  learning_rate: 3e-4
+  n_steps: 2048
+  batch_size: 64
+  n_epochs: 1
+  gamma: 0.99
+  gae_lambda: 0.95
+  clip_range: 0.2
+  ent_coef: 0.0  
+  reward_scale: 0.02

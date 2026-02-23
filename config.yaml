@@ -1,4 +1,4 @@
-run_name: run1
+run_name: run_SAC_big
 
 model_path: models\saved_model
 
@@ -6,26 +6,26 @@ render_mode: None
 
 log:
   verbose: 1
-  tensorboard_log: logs\tensorboard
 
-
-algo: 'PPO'
+algo: 'SAC'
 
 policy: 'MlpPolicy'
 
 training:
-  total_timesteps: 5000
-  n_envs: 8
+  total_timesteps: 2_000_000
+  n_envs: 1
 
-device: cpu
+device: cuda
 
 hyperparameters:
-  learning_rate: 3e-4
-  n_steps: 2048
-  batch_size: 64
-  n_epochs: 1
+  learning_rate: 3.e-4
+  batch_size: 256
   gamma: 0.99
-  gae_lambda: 0.95
-  clip_range: 0.2
-  ent_coef: 0.0  
-  reward_scale: 0.02
+  tau: 0.005
+  ent_coef: 'auto'
+  target_entropy: 'auto'
+  learning_starts: 10_000
+  buffer_size: 500_000
+  train_freq: 1
+  gradient_steps: 1
+  reward_scale: 1.0

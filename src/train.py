@@ -22,7 +22,7 @@ def train_model(yaml_config_path: str):
     with open(yaml_config_path, 'r') as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
 
-    hp = config['hyperparameters']  # raccourci lisible
+    hp = config['hyperparameters']
 
     env = DummyVecEnv([
         make_env(render_mode=config['render_mode'], reward_scale=hp.get('reward_scale', 1.0))

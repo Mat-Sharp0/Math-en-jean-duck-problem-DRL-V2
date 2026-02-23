@@ -5,7 +5,7 @@ import logging
 from rich.prompt import Prompt
 
 from src.train import train_model
-from src.visualize import visualize, Algo
+from src.visualize import visualize
 
 
 terminal_width = os.get_terminal_size().columns

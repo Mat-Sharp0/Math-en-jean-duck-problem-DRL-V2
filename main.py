@@ -38,9 +38,7 @@ elif choice == "2":
         model_path=input("Model relative path:\n")
         if algo != "":
             break
-    episodes=input("Episodes (default: 5):\n")
-    if episodes == "":
-        episodes=None
+    episodes=int(input("Episodes (default: 5):\n"))
 
     visualize(algo,model_path,episodes)
 elif choice == "3":

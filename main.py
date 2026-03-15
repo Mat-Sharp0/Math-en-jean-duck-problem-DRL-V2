@@ -1,12 +1,22 @@
 import os
+from pathlib import Path
 
-from rich.logging import RichHandler
-import logging
+from src.utils.paths import init_content_dirs, CONTENT_DIR, CONFIG_DIR, MODELS_DIR, DEFAULT_CONFIG_DIR, LOGS_DIR, TENSORBOARD_DIR
+from src.utils.file_function import open_folder, open_file, creat_config, clear_dir
+
+import tkinter as tk
+from tkinter import filedialog
+
+import webbrowser
 from rich.prompt import Prompt
 
 from src.train import train_model
 from src.visualize import visualize
 
+GITHUB_URL = "https://github.com/Mat-Sharp0/Math-en-jean-duck-problem-DRL-V2"
+
+#region Init
+init_content_dirs() 
 
 terminal_width = os.get_terminal_size().columns
 
@@ -15,31 +25,173 @@ print("Duck AI")
 print("-" * terminal_width)
 print("By HIOLLE Mateo")
 print("License: MIT")
-print("Version: 0.1.0")
+print("Version: 1.0.0")
+#endregion
 
-print("\nChoose an option:")
-print("1. Train\n2. Visualize\n3. Close")
+while True:
+    print("\nChoose an option:")
+    print("1. Train\n2. Visualize\n3. Manage file\n4. Documentation\n5. Close")
 
-choice = Prompt.ask(choices=["1", "2", "3"])
+    choice = Prompt.ask(choices=["1", "2", "3", "4", "5"])
 
-if choice == "1":
-    train_config=input("Config file relative path (default: config.yaml):\n")
-    if train_config == "":
-        train_model('config.yaml')
-    else:
-        train_model(input)
-elif choice == "2":
-    while True:
-        algo=input("Algo (PPO, TD3, SAC):\n")
-        if algo != "":
-            break
-    
-    while True:
-        model_path=input("Model relative path:\n")
-        if algo != "":
-            break
-    episodes=int(input("Episodes (default: 5):\n"))
+    #region Work
+    if choice == "1":
+        root = tk.Tk()
+        root.withdraw()
 
-    visualize(algo,model_path,episodes)
-elif choice == "3":
-    exit(0)
+        config = filedialog.askopenfilename(
+            title="Choose config file",
+            initialdir=CONFIG_DIR,
+            filetypes=[
+                ("YAML file", "*.yaml *.yml"),
+                ("All file", "*.*")
+            ]
+        )
+        root.destroy
+
+        if not config:
+            print ("No config file selected")
+        else:
+            try:
+                train_model(config)
+            except OSError as err:
+                print("OS error:", err)
+            except ValueError:
+                print("Could not convert data to an integer.")
+            except Exception as err:
+                print(f"Unexpected {err=}, {type(err)=}")
+                raise
+
+    elif choice == "2":
+        root = tk.Tk()
+        root.withdraw()
+
+        model = filedialog.askopenfilename(
+            title="Choose model file",
+            initialdir=MODELS_DIR,
+            filetypes=[
+                ("ZIP file", "*.zip"),
+                ("All file", "*.*")
+            ]
+        )
+        root.destroy
+
+        if not model:
+            print("No model file selected")
+        else:
+            while True:
+                episodes=input("Episodes:\n")
+                if episodes == "":
+                    print("Episodes not defined")
+                else:
+                    visualize(model, int(episodes))
+                    break
+    #endregion
+
+    #region File Managment
+    elif choice == "3":
+        while True:
+            print("1. Open content folder\n2. New config file\n3. Clear file\n4. Go Back")
+            choice = Prompt.ask(choices=["1", "2", "3", "4"])
+            
+            if choice == "1":
+                open_folder(CONTENT_DIR)
+                continue
+
+
+            #region Makefile
+            elif choice == "2":
+                print("1. PPO\n2. TD3\n3. SAC\n4. Go Back")
+                choice = Prompt.ask(choices=["1", "2", "3", "4"])
+
+                if choice == "1":
+                    try:
+                        new_config = creat_config(template_path=(DEFAULT_CONFIG_DIR / "default_config_ppo.yaml"))
+                    except ValueError("Canceled"):
+                        print("Canceled")
+                        continue
+                    print(f"Config file create: {new_config}")
+                    open_file(new_config)
+                        
+                elif choice == "2":
+                    try:
+                        new_config = creat_config(template_path=(DEFAULT_CONFIG_DIR / "default_config_td3.yaml"))
+                    except ValueError("Canceled"):
+                        print("Canceled")
+                        continue
+                    print(f"Config file create: {new_config}")
+                    open_file(new_config)
+
+                elif choice == "3":
+                    try:
+                        new_config = creat_config(template_path=(DEFAULT_CONFIG_DIR / "default_config_sac.yaml"))
+                    except ValueError("Canceled"):
+                        print("Canceled")
+                        continue
+                    print(f"Config file create: {new_config}")
+                    open_file(new_config)
+                continue
+            #endregion
+
+            #region Clearfile
+            elif choice == "3":
+                print("1. Clear logs\n2. Clear config files\n3. Clear models\n4. Clear all\n5. Go Back")
+                choice = Prompt.ask(choices=["1", "2", "3", "4", "5"])
+                if choice == "1":
+                    print("Are you sure you want to delete all the logs?\nOnce you delete file, there is no going back. Please be certain.")
+                    choice = Prompt.ask(choices=["y", "n"])
+                    if choice == "y":
+                        clear_dir(LOGS_DIR, [TENSORBOARD_DIR.name])
+                        clear_dir(TENSORBOARD_DIR)
+                        init_content_dirs() 
+                        print("Logs clear")
+                    elif choice == "2":
+                        print("Canceled")
+                        continue
+                elif choice == "2":
+                    print("Are you sure you want to delete all the configs?\nOnce you delete file, there is no going back. Please be certain.")
+                    choice = Prompt.ask(choices=["y", "n"])
+                    if choice == "y":
+                        clear_dir(CONFIG_DIR)
+                        init_content_dirs() 
+                        print("Configs clear")
+                    elif choice == "2":
+                        print("Canceled")
+                        continue
+                elif choice == "3":
+                    print("Are you sure you want to delete all the models?\nOnce you delete file, there is no going back. Please be certain.")
+                    choice = Prompt.ask(choices=["y", "n"])
+                    if choice == "y":
+                        clear_dir(MODELS_DIR)
+                        init_content_dirs() 
+                        print("Models clear")
+                    elif choice == "2":
+                        print("Canceled")
+                        continue
+                elif choice == "4":
+                    print("Are you sure you want to delete all the content?\nOnce you delete file, there is no going back. Please be certain.")
+                    choice = Prompt.ask(choices=["y", "n"])
+                    if choice == "y":
+                        clear_dir(LOGS_DIR, [TENSORBOARD_DIR.name])
+                        clear_dir(TENSORBOARD_DIR)
+                        clear_dir(MODELS_DIR)
+                        clear_dir(CONFIG_DIR)
+                        init_content_dirs() 
+                        print("Content clear")
+                    elif choice == "2":
+                        print("Canceled")
+                        continue
+                continue
+            #endregion
+         
+            elif choice == "4":
+                break
+    #endregion
+
+    elif choice == "4":
+        print(f"\nGitHub : {GITHUB_URL}")
+        webbrowser.open(GITHUB_URL)
+            
+    elif choice == "5":
+        exit(0)
+        break

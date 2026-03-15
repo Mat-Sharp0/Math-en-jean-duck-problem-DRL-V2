@@ -5,7 +5,7 @@ from gymnasium import spaces
 from src.env.entity import Duck, Wolf
 
 
-class CircleWorldEnv(gym.Env):
+class Environment(gym.Env):
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 30}
 
     def __init__(
@@ -16,6 +16,7 @@ class CircleWorldEnv(gym.Env):
         wolf_speed=2.0,
         catch_radius=0.1,
         max_steps=500,
+        reward_scale: float = 0.02,
     ):
         super().__init__()
         self.radius = radius
@@ -23,25 +24,16 @@ class CircleWorldEnv(gym.Env):
         self.wolf_speed = wolf_speed
         self.catch_radius = catch_radius
         self.max_steps = max_steps
+        self.reward_scale = reward_scale
 
         self.steps = 0
         self.duck = Duck()
         self.wolf = Wolf(np.array([0.0, -self.radius], dtype=np.float64))
 
-        self.observation_space = spaces.Dict(
-            {
-                "duck": spaces.Box(
-                    low=-1.0, high=1.0, shape=(2,), dtype=np.float32
-                ),
-                "wolf": spaces.Box(
-                    low=-1.0, high=1.0, shape=(2,), dtype=np.float32
-                ),
-            }
-        )
+        self.observation_space = spaces.Box(low=-1.0, high=1.0, shape=(4,), dtype=np.float32)
 
-        self.action_space = spaces.Box(
-            low=-1.0, high=1.0, shape=(2,), dtype=np.float32
-        )
+
+        self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2,), dtype=np.float32)
 
         self.render_mode = render_mode
         self.window_size = 512
@@ -49,10 +41,9 @@ class CircleWorldEnv(gym.Env):
         self.clock = None
 
     def _get_obs(self):
-        return {
-            "duck": (self.duck.pos / self.radius).astype(np.float32),
-            "wolf": (self.wolf.pos / self.radius).astype(np.float32),
-        }
+        duck_obs = (self.duck.pos / self.radius).astype(np.float32)
+        wolf_obs = (self.wolf.pos / self.radius).astype(np.float32)
+        return np.concatenate([duck_obs, wolf_obs - duck_obs], dtype=np.float32)
 
     def _get_info(self):
         return {
@@ -96,6 +87,9 @@ class CircleWorldEnv(gym.Env):
 
         duck_dist = np.linalg.norm(self.duck.pos)
         wolf_dist = np.linalg.norm(self.duck.pos - self.wolf.pos)
+
+        distance = info.get("distance", 0.0)
+        reward += self.reward_scale * distance
 
         if duck_dist >= self.radius:
             terminated = True

@@ -1,22 +1,27 @@
-from src.env.circle_world import CircleWorldEnv
-from src.env.wrappers.reward import DistanceRewardWrapper
-from src.env.wrappers.observation import RelativeObservationWrapper
+import json, zipfile
+
+from src.env.environment import Environment
 from stable_baselines3 import PPO, TD3, SAC
 
-def visualize(algo:str, model_path:str, episodes=5):
-    if algo == 'PPO':
+def visualize(model_path:str, episodes:int):
+    with zipfile.ZipFile(model_path, "r") as zf:
+        with zf.open("metadata.json") as f:
+            meta = json.load(f)
+
+    if meta['algo'] == 'PPO':
         model = PPO.load(model_path)
-    elif algo == 'TD3':
+    elif meta['algo'] == 'TD3':
         model = TD3.load(model_path)
-    elif algo == 'SAC':
+    elif meta['algo'] == 'SAC':
         model = SAC.load(model_path)
     else:
-        raise ValueError(f"Unsupported algorithm: {algo}")
+        raise ValueError(f"Unsupported algorithm: {meta['algo']}")
 
 
-    env = CircleWorldEnv(render_mode="human")
-    env = DistanceRewardWrapper(env)
-    env = RelativeObservationWrapper(env)
+    env = Environment(
+        render_mode="human",
+        reward_scale=1.0
+    )
 
     for i in range(episodes):
         obs, _ = env.reset()

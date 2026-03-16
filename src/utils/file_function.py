@@ -52,7 +52,7 @@ def creat_config(template_path):
         ("All file", "*.*")
     ])
 
-    root.destroy
+    root.destroy()
 
     if not file_path:
         raise ValueError("Canceled")

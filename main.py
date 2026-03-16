@@ -47,7 +47,7 @@ while True:
                 ("All file", "*.*")
             ]
         )
-        root.destroy
+        root.destroy()
 
         if not config:
             print ("No config file selected")
@@ -74,7 +74,7 @@ while True:
                 ("All file", "*.*")
             ]
         )
-        root.destroy
+        root.destroy()
 
         if not model:
             print("No model file selected")

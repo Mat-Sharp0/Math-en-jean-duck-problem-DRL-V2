@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+import sys
 
 from src.utils.paths import init_content_dirs, CONTENT_DIR, CONFIG_DIR, MODELS_DIR, DEFAULT_CONFIG_DIR, LOGS_DIR, TENSORBOARD_DIR
 from src.utils.file_function import open_folder, open_file, creat_config, clear_dir
@@ -193,5 +194,5 @@ while True:
         webbrowser.open(GITHUB_URL)
             
     elif choice == "5":
-        exit(0)
+        sys.exit(0)
         break

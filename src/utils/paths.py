@@ -28,10 +28,12 @@ DEFAULTS_DIR = RESOURCE_DIR / "defaults"
 DEFAULT_CONFIG_DIR = DEFAULTS_DIR / "configs" 
 PRETRAINED_DIR = DEFAULTS_DIR / "models"
 
-def _copy_exemples(source_dir: Path, dest_dir: Path):
+def _copy_exemples(source_dir: Path, dest_dir: Path, exclude: set[str] = {}):
     if not source_dir.exists():
         return
     for source in source_dir.iterdir():
+        if source.name in exclude:
+            continue
         dest = dest_dir / source.name
         if not dest.exists():
             shutil.copy(source, dest)
@@ -42,4 +44,4 @@ def init_content_dirs():
         d.mkdir(parents=True, exist_ok=True)
     
     _copy_exemples(DEFAULT_CONFIG_DIR, CONFIG_DIR)
-    _copy_exemples(PRETRAINED_DIR, MODELS_DIR)
+    _copy_exemples(PRETRAINED_DIR, MODELS_DIR, {"PPO_circle_world_legacy.zip", "SAC_run_SAC_big_legacy.zip"})

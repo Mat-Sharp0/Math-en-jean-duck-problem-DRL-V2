@@ -80,7 +80,7 @@ while True:
             print("No model file selected")
         else:
             while True:
-                episodes=input("Episodes:\n")
+                episodes=input("Episodes: ")
                 if episodes == "":
                     print("Episodes not defined")
                 else:

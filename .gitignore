@@ -1,2 +1,4 @@
 /.venv
-user_content/**
+/user_content/**
+/build
+/dist

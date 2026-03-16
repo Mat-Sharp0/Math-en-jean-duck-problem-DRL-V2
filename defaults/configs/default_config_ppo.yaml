@@ -4,7 +4,7 @@ meta:
 
 algo: PPO
 policy: MlpPolicy
-device: cuda
+device: cpu
 render_mode: null
 
 env:
@@ -12,8 +12,8 @@ env:
   wolf_speed: 2.0
 
 training:
-  n_envs: 4
-  total_timesteps: 1_000_000
+  n_envs: 8
+  total_timesteps: 500_000
 
 log:
   verbose: 1
@@ -25,6 +25,6 @@ hyperparameters:
   n_epochs: 10
   gae_lambda: 0.95
   clip_range: 0.2
-  ent_coef: 0.01
+  ent_coef: 0.0
   gamma: 0.99
   reward_scale: 1.0

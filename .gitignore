@@ -1,4 +1,7 @@
 /.venv
-/user_content/**
+user_content/**
 /build
 /dist
+**/__pycache__/
+**/*.pyc
+**/*.pyo

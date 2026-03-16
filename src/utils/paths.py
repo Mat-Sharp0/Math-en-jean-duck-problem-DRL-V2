@@ -2,12 +2,6 @@ import sys
 import shutil
 import stat
 from pathlib import Path
-
-def get_app_dir():
-    if getattr(sys, 'frozen', False):
-        return Path(sys.executable).parent
-    else:
-        return Path(__file__).parent.parent.parent
     
 def get_resource_dir():
     if getattr(sys, 'frozen', False):
@@ -15,10 +9,15 @@ def get_resource_dir():
     else:
         return Path(__file__).parent.parent.parent
     
-APP_DIR = get_app_dir()
+def get_content_dir():
+    if getattr(sys, 'frozen', False):
+        return Path.home() / "Documents" / "DuckAI"
+    else:
+        return Path(__file__).parent.parent.parent / "user_content"
+    
 RESOURCE_DIR = get_resource_dir()
 
-CONTENT_DIR = APP_DIR / "user_content"
+CONTENT_DIR = get_content_dir()
 CONFIG_DIR = CONTENT_DIR / "config"
 LOGS_DIR = CONTENT_DIR / "logs"
 TENSORBOARD_DIR = LOGS_DIR / "tensorboard"
@@ -28,7 +27,7 @@ DEFAULTS_DIR = RESOURCE_DIR / "defaults"
 DEFAULT_CONFIG_DIR = DEFAULTS_DIR / "configs" 
 PRETRAINED_DIR = DEFAULTS_DIR / "models"
 
-def _copy_exemples(source_dir: Path, dest_dir: Path, exclude: set[str] = {}):
+def _copy_examples(source_dir: Path, dest_dir: Path, exclude: set[str] = {}):
     if not source_dir.exists():
         return
     for source in source_dir.iterdir():
@@ -43,5 +42,5 @@ def init_content_dirs():
     for d in [CONFIG_DIR, LOGS_DIR, TENSORBOARD_DIR, MODELS_DIR]:
         d.mkdir(parents=True, exist_ok=True)
     
-    _copy_exemples(DEFAULT_CONFIG_DIR, CONFIG_DIR)
-    _copy_exemples(PRETRAINED_DIR, MODELS_DIR, {"PPO_circle_world_legacy.zip", "SAC_run_SAC_big_legacy.zip"})
+    _copy_examples(DEFAULT_CONFIG_DIR, CONFIG_DIR)
+    _copy_examples(PRETRAINED_DIR, MODELS_DIR, {"PPO_circle_world_legacy.zip", "SAC_run_SAC_big_legacy.zip"})

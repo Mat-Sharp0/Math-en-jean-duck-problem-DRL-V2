@@ -3,7 +3,8 @@ import json, zipfile
 from src.env.environment import Environment
 from stable_baselines3 import PPO, TD3, SAC
 
-def visualize(model_path:str, episodes:int):
+def visualize(model_path:str, episodes:int = 1) -> None:
+    """Visualize model"""
     with zipfile.ZipFile(model_path, "r") as zf:
         with zf.open("metadata.json") as f:
             meta = json.load(f)

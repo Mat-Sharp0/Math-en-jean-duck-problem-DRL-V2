@@ -6,16 +6,17 @@ from src.env.entity import Duck, Wolf
 
 
 class Environment(gym.Env):
+    """Gymnasium environment class"""
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 30}
 
     def __init__(
         self,
-        render_mode=None,
-        radius=5.0,
-        duck_speed=1.0,
-        wolf_speed=2.0,
-        catch_radius=0.1,
-        max_steps=500,
+        render_mode: str = None,
+        radius: float = 5.0,
+        duck_speed: float = 1.0,
+        wolf_speed: float = 2.0,
+        catch_radius: float = 0.1,
+        max_steps: int = 500,
         reward_scale: float = 0.02,
     ):
         super().__init__()

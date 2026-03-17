@@ -16,7 +16,8 @@ import yaml
 
 
 
-def open_folder(path):
+def open_folder(path: Path) -> None:
+    """Open a folder in file explorer"""
     if sys.platform == "win32":
         subprocess.Popen(f'explorer "{path}"')
     elif sys.platform == "darwin":
@@ -26,7 +27,8 @@ def open_folder(path):
 
 
 
-def open_file(file_path: str):
+def open_file(file_path: Path) -> None:
+    """Open a file with default app"""
     if sys.platform == "win32":
         os.startfile(file_path)
     elif sys.platform == "darwin":
@@ -35,14 +37,15 @@ def open_file(file_path: str):
         subprocess.run(["xdg-open", file_path])
 
 
-def creat_config(template_path):
+def creat_config(template_path: Path) -> Path:
+    """Creat a new config file frome a template config file"""
     with open(template_path, "r", encoding="utf-8") as template_f:
         template = yaml.safe_load(template_f)
     
     root = tk.Tk()
     root.withdraw()
 
-    file_path = filedialog.asksaveasfilename(
+    file_path = Path(filedialog.asksaveasfilename(
     title=f"""Creat new {template['algo']} config""",
     initialdir=CONFIG_DIR,
     initialfile=f"""new_config_{template["algo"]}.yaml""",
@@ -50,31 +53,31 @@ def creat_config(template_path):
     filetypes=[
         ("YAML file", "*.yaml *.yml"),
         ("All file", "*.*")
-    ])
+    ]))
 
     root.destroy()
 
-    if not file_path:
+    if not file_path.exists():
         raise ValueError("Canceled")
     data = copy.deepcopy(template)
-    data["meta"]["run_name"] = Path(file_path).stem
+    data["meta"]["run_name"] = file_path.stem
     with open(file_path, "w", encoding="utf-8") as f:
         yaml.dump(data, f, default_flow_style=False, allow_unicode=True)
 
     return file_path
 
 
-def clear_dir(path, exclude=[]):
-    exclude_set = set(exclude)
+def clear_dir(path: Path, exclude: set[str] = {}) -> None:
+    """Remove all content of a directory"""
 
-    for i in Path(path).iterdir():
-        if i.name in exclude_set:
+    for i in path.iterdir():
+        if i.name in exclude:
             continue
         if i.is_file() or i.is_symlink():
             i.chmod(stat.S_IWRITE | stat.S_IREAD)
             i.unlink()
         elif i.is_dir():
-            for f in Path(i).rglob("*"):
+            for f in i.rglob("*"):
                 if f.is_file():
                     f.chmod(stat.S_IWRITE | stat.S_IREAD)
             shutil.rmtree(i)

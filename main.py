@@ -142,9 +142,9 @@ while True:
                     print("Are you sure you want to delete all the logs?\nOnce you delete file, there is no going back. Please be certain.")
                     choice = Prompt.ask(choices=["y", "n"])
                     if choice == "y":
-                        clear_dir(LOGS_DIR, [TENSORBOARD_DIR.name])
+                        clear_dir(LOGS_DIR, {TENSORBOARD_DIR.name})
                         clear_dir(TENSORBOARD_DIR)
-                        init_content_dirs() 
+                        init_content_dirs()
                         print("Logs clear")
                     elif choice == "2":
                         print("Canceled")

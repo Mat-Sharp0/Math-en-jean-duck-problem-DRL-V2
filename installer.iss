@@ -9,16 +9,17 @@ OutputBaseFilename=DuckAI_Setup
 Compression=lzma2/ultra64
 SolidCompression=yes
 PrivilegesRequired=lowest
+PrivilegesRequiredOverridesAllowed=dialog
 
 [Files]
 Source: "dist\DuckAI\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
 
 [Icons]
 Name: "{group}\Duck AI"; Filename: "{app}\DuckAI.exe"
-Name: "{commondesktop}\Duck AI"; Filename: "{app}\DuckAI.exe"; Tasks: desktopicon
+Name: "{autodesktop}\Duck AI"; Filename: "{app}\DuckAI.exe"; Tasks: desktopicon
 
 [Tasks]
-Name: desktopicon; Description: "Créer un raccourci sur le bureau"; GroupDescription: "Options :"; Flags: unchecked
+Name: desktopicon; Description: "Create a desktop shortcut"; GroupDescription: "Options :"; Flags: unchecked
 
 [Run]
-Filename: "{app}\DuckAI.exe"; Description: "Lancer Duck AI"; Flags: postinstall nowait skipifsilent
+Filename: "{app}\DuckAI.exe"; Description: "Launch Duck AI"; Flags: postinstall nowait skipifsilent

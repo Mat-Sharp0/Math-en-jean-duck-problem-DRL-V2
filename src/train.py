@@ -1,6 +1,7 @@
 import yaml
 import json, uuid, zipfile
 from datetime import datetime
+from pathlib import Path
 
 from src.utils.paths import TENSORBOARD_DIR, MODELS_DIR
 
@@ -13,8 +14,14 @@ from stable_baselines3.common.noise import NormalActionNoise
 from src.env.environment import Environment
 
 
-def make_env(render_mode=None, duck_speed: float = 1.0, wolf_speed: float = 2.0, reward_scale: float = 1.0):
-    def _init():
+def make_env(
+        render_mode: str = None,
+        duck_speed: float = 1.0,
+        wolf_speed: float = 2.0,
+        reward_scale: float = 1.0
+        ) -> Environment:
+    
+    def _init() -> Environment:
         env = Environment(
             render_mode=render_mode,
             duck_speed=duck_speed,
@@ -25,7 +32,13 @@ def make_env(render_mode=None, duck_speed: float = 1.0, wolf_speed: float = 2.0,
     return _init
 
 
-def train_model(yaml_config_path: str):
+def train_model(yaml_config_path: Path) -> Path:
+    """
+    Train AI using config file
+    
+    :param yaml_config_path: The config file path
+    :return: The trained model path
+    """
 
     with open(yaml_config_path, 'r') as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
@@ -110,6 +123,8 @@ def train_model(yaml_config_path: str):
 
     model.save(path)
 
+    model_path = Path(f"{path}.zip")
+
     meta = {
     "model_name": config['meta']['run_name'],
     "version": config['meta']['version'],
@@ -118,5 +133,7 @@ def train_model(yaml_config_path: str):
     "algo": config['algo']
     }
 
-    with zipfile.ZipFile(f"{path}.zip", "a") as zf:
+    with zipfile.ZipFile(model_path, "a") as zf:
         zf.writestr("metadata.json", json.dumps(meta, indent=2))
+
+    return model_path

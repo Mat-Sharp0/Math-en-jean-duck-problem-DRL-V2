@@ -2,6 +2,7 @@ import numpy as np
 import math
 
 class Duck:
+    """Duck agent class"""
     def __init__(self, pos=None):
         """
         pos: initial position [x, y], as an np.array
@@ -24,6 +25,7 @@ class Duck:
 
 
 class Wolf:
+    """Wolf agent class"""
     def __init__(self, pos=None):
         self.pos = np.array(pos if pos is not None else [0.0, 0.0], dtype=np.float64)
     

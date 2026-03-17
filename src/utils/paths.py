@@ -3,13 +3,13 @@ import shutil
 import stat
 from pathlib import Path
     
-def get_resource_dir():
+def get_resource_dir() -> Path:
     if getattr(sys, 'frozen', False):
         return Path(sys._MEIPASS)
     else:
         return Path(__file__).parent.parent.parent
     
-def get_content_dir():
+def get_content_dir() -> Path:
     if getattr(sys, 'frozen', False):
         return Path.home() / "Documents" / "DuckAI"
     else:
@@ -27,7 +27,7 @@ DEFAULTS_DIR = RESOURCE_DIR / "defaults"
 DEFAULT_CONFIG_DIR = DEFAULTS_DIR / "configs" 
 PRETRAINED_DIR = DEFAULTS_DIR / "models"
 
-def _copy_examples(source_dir: Path, dest_dir: Path, exclude: set[str] = {}):
+def _copy_examples(source_dir: Path, dest_dir: Path, exclude: set[str] = {}) -> None:
     if not source_dir.exists():
         return
     for source in source_dir.iterdir():
@@ -38,7 +38,8 @@ def _copy_examples(source_dir: Path, dest_dir: Path, exclude: set[str] = {}):
             shutil.copy(source, dest)
             dest.chmod(stat.S_IREAD | stat.S_IRGRP | stat.S_IROTH)
 
-def init_content_dirs():
+def init_content_dirs() -> None:
+    """Build user_content directory"""
     for d in [CONFIG_DIR, LOGS_DIR, TENSORBOARD_DIR, MODELS_DIR]:
         d.mkdir(parents=True, exist_ok=True)
     

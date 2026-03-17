@@ -54,7 +54,7 @@ while True:
             print ("No config file selected")
         else:
             try:
-                train_model(config)
+                train_model(Path(config))
             except OSError as err:
                 print("OS error:", err)
             except ValueError:
@@ -85,7 +85,7 @@ while True:
                 if episodes == "":
                     print("Episodes not defined")
                 else:
-                    visualize(model, int(episodes))
+                    visualize(Path(model), int(episodes))
                     break
     #endregion
 

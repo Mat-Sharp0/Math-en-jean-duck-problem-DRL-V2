@@ -45,7 +45,7 @@ def creat_config(template_path: Path) -> Path:
     root = tk.Tk()
     root.withdraw()
 
-    file_path = Path(filedialog.asksaveasfilename(
+    file_path = filedialog.asksaveasfilename(
     title=f"""Creat new {template['algo']} config""",
     initialdir=CONFIG_DIR,
     initialfile=f"""new_config_{template["algo"]}.yaml""",
@@ -53,18 +53,18 @@ def creat_config(template_path: Path) -> Path:
     filetypes=[
         ("YAML file", "*.yaml *.yml"),
         ("All file", "*.*")
-    ]))
+    ])
 
     root.destroy()
-
-    if not file_path.exists():
+    
+    if not file_path:
         raise ValueError("Canceled")
     data = copy.deepcopy(template)
-    data["meta"]["run_name"] = file_path.stem
+    data["meta"]["run_name"] = Path(file_path).stem
     with open(file_path, "w", encoding="utf-8") as f:
         yaml.dump(data, f, default_flow_style=False, allow_unicode=True)
 
-    return file_path
+    return Path(file_path)
 
 
 def clear_dir(path: Path, exclude: set[str] = {}) -> None:

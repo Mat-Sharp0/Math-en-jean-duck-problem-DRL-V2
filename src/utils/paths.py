@@ -11,7 +11,10 @@ def get_resource_dir() -> Path:
     
 def get_content_dir() -> Path:
     if getattr(sys, 'frozen', False):
-        return Path.home() / "Documents" / "DuckAI"
+        if sys.platform.startswith("linux"):
+            return Path.home() / ".local" / "share" / "DuckAI"
+        else:
+            return Path.home() / "Documents" / "DuckAI"
     else:
         return Path(__file__).parent.parent.parent / "user_content"
     

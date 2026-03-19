@@ -8,6 +8,8 @@ sb3_datas     = collect_data_files('stable_baselines3')
 gym_datas     = collect_data_files('gymnasium')
 tb_datas = collect_data_files('tensorboard')
 
+# Update value here, in installer.iss and in src/utils/app_info.py
+
 a = Analysis(
     ['main.py'],
     pathex=[],
@@ -51,9 +53,14 @@ a = Analysis(
         'yaml',
         'rich',
         'rich.prompt',
+        'rich.console',
         'tkinter',
         'tkinter.filedialog',
         'pygame',
+        'requests',
+        'urllib3',
+        'certifi',
+        'charset_normalizer',
     ],
     hookspath=[],
     hooksconfig={},

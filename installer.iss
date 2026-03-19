@@ -1,7 +1,10 @@
 [Setup]
+
+; Update value here, in DuckAI.spec and in src/utils/app_info.py
+
 AppName=Duck AI
 AppVersion=1.0.0
-AppPublisher=Mateo Hiolle
+AppPublisher=HIOLLE Mateo
 DefaultDirName={autopf}\DuckAI
 DefaultGroupName=Duck AI
 OutputDir=installer_output

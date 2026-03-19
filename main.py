@@ -14,22 +14,28 @@ from rich.prompt import Prompt
 from src.train import train_model
 from src.visualize import visualize
 
-GITHUB_URL = "https://github.com/Mat-Sharp0/Math-en-jean-duck-problem-DRL-V2"
+from src.utils.updater import check_for_update
+from src.utils.app_info import APP_NAME, VERSION, AUTHOR, GITHUB_URL
 
 #region Init
-init_content_dirs() 
+init_content_dirs()
 
 terminal_width = os.get_terminal_size().columns
 
 print("-" * terminal_width)
-print("Duck AI")
+print(APP_NAME)
 print("-" * terminal_width)
-print("By HIOLLE Mateo")
+print(f"By {AUTHOR}")
 print("License: MIT")
-print("Version: 1.0.0")
+print(f"Version: {VERSION}")
+
+if getattr(sys, 'frozen', False):
+    check_for_update()
+
 #endregion
 
 while True:
+    
     print("\nChoose an option:")
     print("1. Train\n2. Visualize\n3. Manage file\n4. Documentation\n5. Close")
 
@@ -190,6 +196,7 @@ while True:
     #endregion
 
     elif choice == "4":
+
         print(f"\nGitHub : {GITHUB_URL}")
         webbrowser.open(GITHUB_URL)
             

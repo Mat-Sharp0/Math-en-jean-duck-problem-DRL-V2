@@ -4,7 +4,7 @@ meta:
 
 algo: TD3
 policy: MlpPolicy
-device: cuda
+device: auto
 render_mode: null
 
 env:

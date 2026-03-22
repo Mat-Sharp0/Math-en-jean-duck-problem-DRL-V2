@@ -1,15 +1,15 @@
 import subprocess
 import sys, os
 import stat
-
-from pathlib import Path
 import copy
 import shutil
+import yaml
+
+from pathlib import Path
+import tkinter as tk
+from tkinter import filedialog
 
 from src.utils.paths import CONFIG_DIR
-from pathlib import Path
-
-import tkinter as tk
 from tkinter import filedialog
 
 import yaml

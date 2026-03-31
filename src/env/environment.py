@@ -12,6 +12,7 @@ class Environment(gym.Env):
     def __init__(
         self,
         render_mode: str = None,
+        render_fps: int = 30,
         radius: float = 5.0,
         duck_speed: float = 1.0,
         wolf_speed: float = 2.0,
@@ -37,6 +38,7 @@ class Environment(gym.Env):
         self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2,), dtype=np.float32)
 
         self.render_mode = render_mode
+        self.render_fps = render_fps
         self.window_size = 512
         self.window = None
         self.clock = None
@@ -143,7 +145,7 @@ class Environment(gym.Env):
             self.window.blit(canvas, canvas.get_rect())
             pygame.event.pump()
             pygame.display.update()
-            self.clock.tick(self.metadata["render_fps"])
+            self.clock.tick(self.render_fps)
         else:
             return np.transpose(
                 pygame.surfarray.array3d(canvas), axes=(1, 0, 2)

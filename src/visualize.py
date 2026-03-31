@@ -21,6 +21,7 @@ def visualize(model_path:str, episodes:int = 1) -> None:
 
     env = Environment(
         render_mode="human",
+        render_fps=5,
         reward_scale=1.0
     )
 

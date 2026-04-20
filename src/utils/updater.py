@@ -14,7 +14,7 @@ def check_for_update() -> None:
             timeout=3
         )
         if response.status_code != 200:
-            print("no realeas")
+            console.print(f"[bold red]\nFailed to fetch releases (HTTP {response.status_code})")
             return
         
         latest = response.json().get("tag_name", "").lstrip("v")

@@ -49,7 +49,7 @@ def train_model(yaml_config_path: Path) -> Path:
         make_env(render_mode=config['render_mode'], duck_speed=config['env']['duck_speed'], wolf_speed=config['env']['wolf_speed'], reward_scale=hp.get('reward_scale', 1.0))
         for _ in range(config['training']['n_envs'])
     ])
-    env = VecNormalize(env, norm_obs=True, norm_reward=True)
+    env = VecNormalize(env, norm_obs=True, norm_reward=False)
 
     if config['algo'] == 'PPO':
         model = PPO(

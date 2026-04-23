@@ -76,7 +76,7 @@ class Environment(gym.Env):
 
         terminated = False
         truncated = False
-        reward = -0.001
+        reward = -0.001*self.reward_scale
 
         action = np.clip(action, -1.0, 1.0)
         action = action * self.duck_speed
@@ -92,7 +92,7 @@ class Environment(gym.Env):
         wolf_dist = np.linalg.norm(self.duck.pos - self.wolf.pos)
 
         distance = info.get("distance", 0.0)
-        reward += self.reward_scale * distance
+        #reward += self.reward_scale * distance
 
         if duck_dist >= self.radius:
             terminated = True

@@ -21,7 +21,9 @@ def visualize(model_path:str, episodes:int = 1) -> None:
 
     env = Environment(
         render_mode="human",
-        render_fps=5,
+        duck_speed=1.0,
+        wolf_speed=3.0,
+        render_fps=100000,
         reward_scale=1.0
     )
 
@@ -34,5 +36,7 @@ def visualize(model_path:str, episodes:int = 1) -> None:
             action, _ = model.predict(obs, deterministic=True)
             obs, reward, terminated, truncated, info = env.step(action)
             done = terminated or truncated
+            if done:
+                print(info["result"])
             
     env.close()

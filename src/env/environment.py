@@ -13,12 +13,12 @@ class Environment(gym.Env):
         self,
         render_mode: str = None,
         render_fps: int = 30,
-        radius: float = 5.0,
+        radius: float = 100.0,
         duck_speed: float = 1.0,
-        wolf_speed: float = 2.0,
+        wolf_speed: float = 4.1,
         catch_radius: float = 0.1,
         max_steps: int = 500,
-        reward_scale: float = 0.02,
+        reward_scale: float = 1.0,
     ):
         super().__init__()
         self.radius = radius
@@ -92,15 +92,14 @@ class Environment(gym.Env):
         wolf_dist = np.linalg.norm(self.duck.pos - self.wolf.pos)
 
         distance = info.get("distance", 0.0)
-        #reward += self.reward_scale * distance
 
         if duck_dist >= self.radius:
             terminated = True
             if wolf_dist > self.catch_radius:
-                reward += 1.0
+                reward += 1.0*self.reward_scale
                 info["result"] = "win"
             else:
-                reward -= 1.0
+                reward -= 1.0*self.reward_scale
                 info["result"] = "lose"
 
         elif self.steps >= self.max_steps:

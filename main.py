@@ -87,11 +87,23 @@ while True:
             print("No model file selected")
         else:
             while True:
-                episodes=input("Episodes: ")
-                if episodes == "":
-                    print("Episodes not defined")
+                wolf_speed = input("Wolf speed: ")
+                if wolf_speed == "":
+                    print("Wolf speed not defined")
                 else:
-                    visualize(Path(model), int(episodes))
+                    while True:
+                        fps = input("FPS: ")
+                        if fps == "":
+                            print("FPS not defined")
+                        else:
+                            while True:
+                                episodes=input("Episodes: ")
+                                if episodes == "":
+                                    print("Episodes not defined")
+                                else:
+                                    visualize(Path(model), float(wolf_speed), int(fps), int(episodes))
+                                    break
+                            break
                     break
     #endregion
 

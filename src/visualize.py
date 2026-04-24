@@ -3,7 +3,7 @@ import json, zipfile
 from src.env.environment import Environment
 from stable_baselines3 import PPO, TD3, SAC
 
-def visualize(model_path:str, episodes:int = 1) -> None:
+def visualize(model_path:str, wolf_speed:float = 3.0, fps:int = 5, episodes:int = 1, ) -> None:
     """Visualize model"""
     with zipfile.ZipFile(model_path, "r") as zf:
         with zf.open("metadata.json") as f:
@@ -22,8 +22,8 @@ def visualize(model_path:str, episodes:int = 1) -> None:
     env = Environment(
         render_mode="human",
         duck_speed=1.0,
-        wolf_speed=3.0,
-        render_fps=100000,
+        wolf_speed=wolf_speed,
+        render_fps=fps,
         reward_scale=1.0
     )
 

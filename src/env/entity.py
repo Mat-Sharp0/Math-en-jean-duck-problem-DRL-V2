@@ -11,7 +11,7 @@ class Duck:
         self.pos = np.array(pos if pos is not None else [0.0, 0.0], dtype=np.float64)
 
  
-    def move(self, ax, ay, max_distance):
+    def move(self, ax, ay, max_distance, radius):
         action = np.array([ax, ay], dtype=np.float32)
         norm = np.linalg.norm(action)
         if norm < 1e-6:
@@ -21,7 +21,9 @@ class Duck:
 
         distance = min(norm, 1.0) * max_distance
 
-        self.pos += direction * distance
+        new_pos = self.pos + direction * distance
+
+        self.pos = np.clip(np.linalg.norm(new_pos), 0, radius) / np.linalg.norm(new_pos) * new_pos if np.linalg.norm(new_pos) > 0 else new_pos
 
 
 class Wolf:

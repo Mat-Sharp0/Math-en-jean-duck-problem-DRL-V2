@@ -81,7 +81,7 @@ class Environment(gym.Env):
         action = np.clip(action, -1.0, 1.0)
         action = action * self.duck_speed
 
-        self.duck.move(ax=action[0], ay=action[1], max_distance=self.duck_speed)
+        self.duck.move(ax=action[0], ay=action[1], max_distance=self.duck_speed, radius=self.radius)
         self.wolf.wolf_move(
             self.duck.pos, np.zeros(2), self.wolf_speed
         )

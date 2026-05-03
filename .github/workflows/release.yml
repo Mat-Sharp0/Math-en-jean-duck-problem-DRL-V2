@@ -1,0 +1,243 @@
+name: Build & Release Duck AI
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version (ex: 2.0.0)'
+        required: true
+        type: string
+      build_target:
+        description: 'Build target'
+        required: true
+        type: choice
+        options:
+          - 'CPU + CUDA'
+          - 'CPU only'
+          - 'CUDA only'
+
+jobs:
+  build-windows-cpu:
+    name: Windows CPU
+    runs-on: windows-latest
+    if: ${{ inputs.build_target == 'CPU + CUDA' || inputs.build_target == 'CPU only' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+
+      - name: Install CPU dependencies
+        run: pip install -r requirements-cpu.txt
+
+      - name: Install PyInstaller
+        run: pip install pyinstaller
+
+      - name: Inject version into app_info.py
+        run: sed -i "s/__version__ = \"dev\"/__version__ = \"${{ inputs.version }}\"/" src/app_info.py
+        shell: bash
+
+      - name: Build with PyInstaller
+        run: pyinstaller build/DuckAI.spec --distpath build/dist
+
+      - name: Build Inno Setup installer
+        run: iscc /DAppVersion=${{ inputs.version }} build\installer.iss
+        shell: cmd
+
+      - name: Rename installer
+        run: mv build/installer_output/DuckAI_Setup.exe build/installer_output/DuckAI_${{ inputs.version }}_windows_cpu_setup.exe
+        shell: bash
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DuckAI_${{ inputs.version }}_windows_cpu
+          path: build/installer_output/DuckAI_${{ inputs.version }}_windows_cpu_setup.exe
+
+  build-windows-cuda:
+    name: Windows CUDA
+    runs-on: windows-latest
+    if: ${{ inputs.build_target == 'CPU + CUDA' || inputs.build_target == 'CUDA only' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+
+      - name: Install CUDA dependencies
+        run: pip install -r requirements-cuda.txt
+
+      - name: Install PyInstaller
+        run: pip install pyinstaller
+
+      - name: Inject version into app_info.py
+        run: sed -i "s/__version__ = \"dev\"/__version__ = \"${{ inputs.version }}\"/" src/app_info.py
+        shell: bash
+
+      - name: Build with PyInstaller
+        run: pyinstaller build/DuckAI.spec --distpath build/dist
+
+      - name: Build Inno Setup installer
+        run: iscc /DAppVersion=${{ inputs.version }} build\installer.iss
+        shell: cmd
+
+      - name: Rename installer
+        run: mv build/installer_output/DuckAI_Setup.exe build/installer_output/DuckAI_${{ inputs.version }}_windows_cuda_setup.exe
+        shell: bash
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DuckAI_${{ inputs.version }}_windows_cuda
+          path: build/installer_output/DuckAI_${{ inputs.version }}_windows_cuda_setup.exe
+
+  build-linux-cpu:
+    name: Linux CPU
+    runs-on: ubuntu-latest
+    if: ${{ inputs.build_target == 'CPU + CUDA' || inputs.build_target == 'CPU only' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+
+      - name: Install CPU dependencies
+        run: pip install -r requirements-cpu.txt
+
+      - name: Install PyInstaller
+        run: pip install pyinstaller
+
+      - name: Inject version into app_info.py
+        run: sed -i "s/__version__ = \"dev\"/__version__ = \"${{ inputs.version }}\"/" src/app_info.py
+
+      - name: Build with PyInstaller
+        run: pyinstaller build/DuckAI.spec --distpath build/dist
+
+      - name: Create .deb package
+        run: |
+          mkdir -p duckai_${{ inputs.version }}_amd64/DEBIAN
+          mkdir -p duckai_${{ inputs.version }}_amd64/usr/local/bin/DuckAI
+          mkdir -p duckai_${{ inputs.version }}_amd64/usr/share/applications
+
+          cp -r build/dist/DuckAI/* duckai_${{ inputs.version }}_amd64/usr/local/bin/DuckAI/
+
+          cat > duckai_${{ inputs.version }}_amd64/DEBIAN/control << EOF
+          Package: duckai
+          Version: ${{ inputs.version }}
+          Architecture: amd64
+          Maintainer: HIOLLE Mateo
+          Description: Duck AI - Deep Reinforcement Learning
+          EOF
+
+          cat > duckai_${{ inputs.version }}_amd64/usr/share/applications/duckai.desktop << EOF
+          [Desktop Entry]
+          Name=Duck AI
+          Exec=/usr/local/bin/DuckAI/DuckAI
+          Icon=utilities-terminal
+          Type=Application
+          Categories=Science;Education;
+          Comment=Deep Reinforcement Learning simulation
+          EOF
+
+          dpkg-deb --build duckai_${{ inputs.version }}_amd64 DuckAI_${{ inputs.version }}_linux_cpu.deb
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DuckAI_${{ inputs.version }}_linux_cpu
+          path: DuckAI_${{ inputs.version }}_linux_cpu.deb
+
+  build-linux-cuda:
+    name: Linux CUDA
+    runs-on: ubuntu-latest
+    if: ${{ inputs.build_target == 'CPU + CUDA' || inputs.build_target == 'CUDA only' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+
+      - name: Install CUDA dependencies
+        run: pip install -r requirements-cuda.txt
+
+      - name: Install PyInstaller
+        run: pip install pyinstaller
+
+      - name: Inject version into app_info.py
+        run: sed -i "s/__version__ = \"dev\"/__version__ = \"${{ inputs.version }}\"/" src/app_info.py
+
+      - name: Build with PyInstaller
+        run: pyinstaller build/DuckAI.spec --distpath build/dist
+
+      - name: Create .deb package
+        run: |
+          mkdir -p duckai_${{ inputs.version }}_amd64/DEBIAN
+          mkdir -p duckai_${{ inputs.version }}_amd64/usr/local/bin/DuckAI
+          mkdir -p duckai_${{ inputs.version }}_amd64/usr/share/applications
+
+          cp -r build/dist/DuckAI/* duckai_${{ inputs.version }}_amd64/usr/local/bin/DuckAI/
+
+          cat > duckai_${{ inputs.version }}_amd64/DEBIAN/control << EOF
+          Package: duckai
+          Version: ${{ inputs.version }}
+          Architecture: amd64
+          Maintainer: HIOLLE Mateo
+          Description: Duck AI - Deep Reinforcement Learning
+          EOF
+
+          cat > duckai_${{ inputs.version }}_amd64/usr/share/applications/duckai.desktop << EOF
+          [Desktop Entry]
+          Name=Duck AI
+          Exec=/usr/local/bin/DuckAI/DuckAI
+          Icon=utilities-terminal
+          Type=Application
+          Categories=Science;Education;
+          Comment=Deep Reinforcement Learning simulation
+          EOF
+
+          dpkg-deb --build duckai_${{ inputs.version }}_amd64 DuckAI_${{ inputs.version }}_linux_cuda.deb
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DuckAI_${{ inputs.version }}_linux_cuda
+          path: DuckAI_${{ inputs.version }}_linux_cuda.deb
+
+  release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: [build-windows-cpu, build-windows-cuda, build-linux-cpu, build-linux-cuda]
+    if: always()
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
+          merge-multiple: true
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ inputs.version }}
+          name: Duck AI v${{ inputs.version }}
+          draft: true
+          files: artifacts/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -9,7 +9,7 @@ render_mode: null
 
 env:
   duck_speed: 1.0
-  wolf_speed: 2.0
+  wolf_speed: 3.0
 
 training:
   n_envs: 8

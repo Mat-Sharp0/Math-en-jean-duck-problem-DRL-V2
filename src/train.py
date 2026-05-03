@@ -12,25 +12,7 @@ from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 from stable_baselines3.common.noise import NormalActionNoise
 
 from src.env.environment import Environment
-
-
-def make_env(
-        render_mode: str = None,
-        duck_speed: float = 1.0,
-        wolf_speed: float = 2.0,
-        reward_scale: float = 1.0
-        ) -> Environment:
-    
-    def _init() -> Environment:
-        env = Environment(
-            render_mode=render_mode,
-            duck_speed=duck_speed,
-            wolf_speed=wolf_speed,
-            reward_scale=reward_scale
-        )
-        return env
-    return _init
-
+import gymnasium as gym
 
 def train_model(yaml_config_path: Path) -> Path:
     """
@@ -45,11 +27,12 @@ def train_model(yaml_config_path: Path) -> Path:
 
     hp = config['hyperparameters']
 
-    env = DummyVecEnv([
-        make_env(render_mode=config['render_mode'], duck_speed=config['env']['duck_speed'], wolf_speed=config['env']['wolf_speed'], reward_scale=hp.get('reward_scale', 1.0))
-        for _ in range(config['training']['n_envs'])
-    ])
-    env = VecNormalize(env, norm_obs=True, norm_reward=False)
+    env = Environment(
+        render_mode=config['render_mode'],
+        duck_speed=config['env']['duck_speed'],
+        wolf_speed=config['env']['wolf_speed'],
+        reward_scale=hp.get('reward_scale', 1.0)
+    )
 
     if config['algo'] == 'PPO':
         model = PPO(

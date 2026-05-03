@@ -2,7 +2,7 @@ import requests
 
 from rich.console import Console
 
-from src.utils.app_info import VERSION, GITHUB_REPO, GITHUB_URL
+from src.utils.app_info import __version__, GITHUB_REPO, GITHUB_URL
 
 console = Console()
 
@@ -19,9 +19,9 @@ def check_for_update() -> None:
         
         latest = response.json().get("tag_name", "").lstrip("v")
         
-        if latest and latest != VERSION:
+        if latest and latest != __version__:
             console.print(f"[bold red]\nNew version available: v{latest}[/]", highlight=False)
-            console.print(f"[dim]Current version: v{VERSION}[/]", highlight=False)
+            console.print(f"[dim]Current version: v{__version__}[/]", highlight=False)
             console.print(f"[cyan]Download: {GITHUB_URL}/releases/latest[/]")
 
     except Exception:

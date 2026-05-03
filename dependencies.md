@@ -1,0 +1,12 @@
+Python version: v3.14.4
+pip version: v26.0.1
+Direct dependencies liste:
+- PyYAML v6.0.3
+- rich v15.0.0
+- NumPy v2.4.0
+- stable-baselines3 v2.8.0
+- gymnasium 1.2.3
+- pygame-ce v2.5.7
+- requests v2.33.13
+- tensorboard v2.20.0
+- tqdm v4.67.3

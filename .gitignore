@@ -1,8 +1,6 @@
 /.venv
 **/__pycache__/
 **/*.pyc
-**/*.pyo
 user_content/**
-/build
-/dist
-/installer_output
+build/dist/
+build/installer_output/

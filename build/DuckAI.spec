@@ -4,19 +4,16 @@ import stable_baselines3, gymnasium, os
 
 block_cipher = None
 
-sb3_datas     = collect_data_files('stable_baselines3')
-gym_datas     = collect_data_files('gymnasium')
-tb_datas = collect_data_files('tensorboard')
-
-# Update value here, in installer.iss and in src/utils/app_info.py
+sb3_datas = collect_data_files('stable_baselines3')
+gym_datas  = collect_data_files('gymnasium')
+tb_datas   = collect_data_files('tensorboard')
 
 a = Analysis(
-    ['main.py'],
-    pathex=[],
+    ['../main.py'],
+    pathex=['..'],
     binaries=collect_dynamic_libs('torch'),
     datas=[
-        ('defaults', 'defaults'),
-
+        ('../defaults', 'defaults'),
         *sb3_datas,
         *gym_datas,
         *tb_datas,
@@ -103,4 +100,5 @@ coll = COLLECT(
     upx=False,
     upx_exclude=[],
     name='DuckAI',
+    distpath='build/dist',
 )

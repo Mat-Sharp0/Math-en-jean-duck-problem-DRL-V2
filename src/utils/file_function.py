@@ -12,8 +12,6 @@ from tkinter import filedialog
 from src.utils.paths import CONFIG_DIR
 from tkinter import filedialog
 
-import yaml
-
 
 
 def open_folder(path: Path) -> None:

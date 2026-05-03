@@ -1,0 +1,13 @@
+[project]
+name = "duck-ai"
+version = "1.1.0"
+description = "Duck AI - Deep Reinforcement Learning"
+requires-python = "==3.14.4"
+license = { file = "LICENSE" }
+
+[build-system]
+requires = ["setuptools==75.8.2"]
+build-backend = "setuptools.backends.legacy:build"
+
+[tool.setuptools.packages.find]
+where = ["src"]

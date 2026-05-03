@@ -15,7 +15,7 @@ from src.train import train_model
 from src.visualize import visualize
 
 from src.utils.updater import check_for_update
-from src.utils.app_info import APP_NAME, VERSION, AUTHOR, GITHUB_URL
+from src.utils.app_info import APP_NAME, __version__, AUTHOR, GITHUB_URL
 
 #region Init
 init_content_dirs()
@@ -27,7 +27,7 @@ print(APP_NAME)
 print("-" * terminal_width)
 print(f"By {AUTHOR}")
 print("License: MIT")
-print(f"Version: {VERSION}")
+print(f"Version: {__version__}")
 
 if getattr(sys, 'frozen', False):
     check_for_update()
@@ -92,19 +92,12 @@ while True:
                     print("Wolf speed not defined")
                 else:
                     while True:
-                        fps = input("FPS: ")
-                        if fps == "":
-                            print("FPS not defined")
+                        episodes=input("Episodes: ")
+                        if episodes == "":
+                            print("Episodes not defined")
                         else:
-                            while True:
-                                episodes=input("Episodes: ")
-                                if episodes == "":
-                                    print("Episodes not defined")
-                                else:
-                                    visualize(Path(model), float(wolf_speed), int(fps), int(episodes))
-                                    break
+                            visualize(Path(model), float(wolf_speed), int(episodes))
                             break
-                    break
     #endregion
 
     #region File Managment

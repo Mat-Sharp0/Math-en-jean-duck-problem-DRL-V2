@@ -1,4 +1,5 @@
 import sys
+import os
 import shutil
 import stat
 from pathlib import Path
@@ -18,6 +19,15 @@ def get_content_dir() -> Path:
     else:
         return Path(__file__).parent.parent.parent / "user_content"
     
+def get_install_dir() -> Path:
+    if getattr(sys, 'frozen', False):
+        if sys.platform.startswith("linux"):
+            return Path.home() / ".local" / "share" / "DuckAI"
+        else:
+            return Path(os.environ.get("LOCALAPPDATA", "")) / "DuckAI"
+    else:
+        return Path(__file__).parent.parent.parent
+    
 RESOURCE_DIR = get_resource_dir()
 
 CONTENT_DIR = get_content_dir()
@@ -29,6 +39,9 @@ MODELS_DIR = CONTENT_DIR / "models"
 DEFAULTS_DIR = RESOURCE_DIR / "defaults" 
 DEFAULT_CONFIG_DIR = DEFAULTS_DIR / "configs" 
 PRETRAINED_DIR = DEFAULTS_DIR / "models"
+
+INSTALL_DIR = get_install_dir()
+INSTALL_INFO_FILE = INSTALL_DIR / "duckai.json"
 
 def _copy_examples(source_dir: Path, dest_dir: Path, exclude: set[str] = {}) -> None:
     if not source_dir.exists():

@@ -8,6 +8,7 @@ import yaml
 from pathlib import Path
 import tkinter as tk
 from tkinter import filedialog
+from rich.console import Console
 
 from src.utils.paths import CONFIG_DIR
 from tkinter import filedialog
@@ -35,7 +36,7 @@ def open_file(file_path: Path) -> None:
         subprocess.run(["xdg-open", file_path])
 
 
-def creat_config(template_path: Path) -> Path:
+def creat_config(console: Console, template_path: Path) -> Path:
     """Creat a new config file frome a template config file"""
     with open(template_path, "r", encoding="utf-8") as template_f:
         template = yaml.safe_load(template_f)
@@ -56,7 +57,7 @@ def creat_config(template_path: Path) -> Path:
     root.destroy()
     
     if not file_path:
-        raise ValueError("Canceled")
+        console.print("Canceled")
     data = copy.deepcopy(template)
     data["meta"]["run_name"] = Path(file_path).stem
     with open(file_path, "w", encoding="utf-8") as f:

@@ -1,0 +1,90 @@
+name: Build
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        type: string
+        required: true
+      os:
+        type: string
+        required: true
+      variant:
+        type: string
+        required: true
+      requirements:
+        type: string
+        required: true
+      artifact_name:
+        type: string
+        required: true
+      installer_suffix:
+        type: string
+        required: true
+
+jobs:
+  build:
+    runs-on: ${{ inputs.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+
+      - name: Install dependencies
+        run: pip install -r ${{ inputs.requirements }}
+
+      - name: Install PyInstaller
+        run: pip install pyinstaller
+
+      - name: Inject version into app_info.py
+        run: sed -i "s/__version__ = \"dev\"/__version__ = \"${{ inputs.version }}\"/" src/utils/app_info.py
+        shell: bash
+
+      - name: Build with PyInstaller
+        run: pyinstaller build/DuckAI.spec --distpath build/dist
+
+      - name: Build Inno Setup installer
+        if: runner.os == 'Windows'
+        run: iscc /DAppVersion=${{ inputs.version }} /DVariant=${{ inputs.variant }} build\installer.iss
+        shell: cmd
+
+      - name: Rename Windows installer
+        if: runner.os == 'Windows'
+        run: mv build/installer_output/DuckAI_Setup.exe build/installer_output/DuckAI_${{ inputs.version }}_${{ inputs.installer_suffix }}
+        shell: bash
+
+      - name: Create .deb package
+        if: runner.os == 'Linux'
+        run: |
+          mkdir -p deb_build/DEBIAN
+          mkdir -p deb_build/usr/share/duckai
+
+          cp -r build/deb/DEBIAN/* deb_build/DEBIAN/
+
+          sed -i 's/VERSION_PLACEHOLDER/${{ inputs.version }}/' deb_build/DEBIAN/control
+          sed -i 's/VARIANT_PLACEHOLDER/${{ inputs.variant }}/' deb_build/DEBIAN/postinst
+
+          chmod +x deb_build/DEBIAN/postinst
+
+          cp -r build/dist/DuckAI/* deb_build/usr/share/duckai/
+
+          dpkg-deb --build deb_build DuckAI_${{ inputs.version }}_${{ inputs.installer_suffix }}
+
+      - name: Upload artifact (Windows)
+        if: runner.os == 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.artifact_name }}
+          path: build/installer_output/DuckAI_${{ inputs.version }}_${{ inputs.installer_suffix }}
+
+      - name: Upload artifact (Linux)
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.artifact_name }}
+          path: DuckAI_${{ inputs.version }}_${{ inputs.installer_suffix }}

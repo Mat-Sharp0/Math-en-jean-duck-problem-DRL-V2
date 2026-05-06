@@ -1,6 +1,12 @@
-/.venv
+.venv/
+
 **/__pycache__/
 **/*.pyc
-user_content/**
+**/*.pyo
+
+user_content/config/
+user_content/logs/
+user_content/models/
+
 build/dist/
 build/installer_output/

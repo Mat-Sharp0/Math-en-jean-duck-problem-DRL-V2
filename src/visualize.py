@@ -1,9 +1,11 @@
 import json, zipfile
 
+from rich.console import Console
+
 from src.env.environment import Environment
 from stable_baselines3 import PPO, TD3, SAC
 
-def visualize(model_path:str, wolf_speed:float = 3.0, episodes:int = 1, ) -> None:
+def visualize(console:Console, model_path:str, wolf_speed:float = 3.0, episodes:int = 1, ) -> None:
     """Visualize model"""
     with zipfile.ZipFile(model_path, "r") as zf:
         with zf.open("metadata.json") as f:
@@ -30,13 +32,13 @@ def visualize(model_path:str, wolf_speed:float = 3.0, episodes:int = 1, ) -> Non
     for i in range(episodes):
         obs, _ = env.reset()
         done = False
-        print(f"Episode {i+1}/{episodes}")
+        console.print(f"Episode {i+1}/{episodes}")
         
         while not done:
             action, _ = model.predict(obs, deterministic=True)
             obs, reward, terminated, truncated, info = env.step(action)
             done = terminated or truncated
             if done:
-                print(info["result"])
+                console.print(info["result"])
             
     env.close()

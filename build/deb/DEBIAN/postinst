@@ -1,0 +1,26 @@
+#!/bin/bash
+set -e
+
+REAL_USER=${SUDO_USER:-$USER}
+REAL_HOME=$(getent passwd "$REAL_USER" | cut -d: -f6)
+
+mkdir -p "$REAL_HOME/.local/bin/DuckAI"
+cp -r /usr/share/duckai/* "$REAL_HOME/.local/bin/DuckAI/"
+chown -R "$REAL_USER:$REAL_USER" "$REAL_HOME/.local/bin/DuckAI"
+
+mkdir -p "$REAL_HOME/.local/share/applications"
+cat > "$REAL_HOME/.local/share/applications/duckai.desktop" << EOF
+[Desktop Entry]
+Name=Duck AI
+Exec=$REAL_HOME/.local/bin/DuckAI/DuckAI
+Icon=utilities-terminal
+Type=Application
+Categories=Science;Education;
+Comment=Deep Reinforcement Learning simulation
+EOF
+chown "$REAL_USER:$REAL_USER" "$REAL_HOME/.local/share/applications/duckai.desktop"
+
+echo '{"variant": "VARIANT_PLACEHOLDER", "version": "VERSION_PLACEHOLDER"}' > "$REAL_HOME/.local/bin/DuckAI/duckai.json"
+chown "$REAL_USER:$REAL_USER" "$REAL_HOME/.local/bin/DuckAI/duckai.json"
+
+rm -rf /usr/share/duckai

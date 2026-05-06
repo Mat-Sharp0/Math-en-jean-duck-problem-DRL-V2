@@ -5,8 +5,9 @@ Direct dependencies liste:
 - rich v15.0.0
 - NumPy v2.4.0
 - stable-baselines3 v2.8.0
-- gymnasium 1.2.3
+- gymnasium v1.2.3
 - pygame-ce v2.5.7
 - requests v2.33.13
 - tensorboard v2.20.0
 - tqdm v4.67.3
+- packaging v26.2

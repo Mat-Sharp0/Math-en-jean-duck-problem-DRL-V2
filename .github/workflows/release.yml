@@ -4,82 +4,78 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version (ex: 2.0.0)'
+        description: 'Version (ex: 1.0.0)'
         required: true
-        type: string
       build_target:
-        description: 'Build target'
+        description: 'Cible de build'
         required: true
         type: choice
-        options:
-          - 'CPU + CUDA'
-          - 'CPU only'
-          - 'CUDA only'
+        options: ['ALL', 'CPU only', 'CUDA only']
 
 jobs:
-  build-windows-cpu:
-    if: inputs.build_target == 'CPU + CUDA' || inputs.build_target == 'CPU only'
-    uses: ./.github/workflows/build.yml
-    with:
-      version: ${{ inputs.version }}
-      os: windows-latest
-      variant: cpu
-      requirements: requirements-cpu.txt
-      artifact_name: DuckAI_windows_cpu
-      installer_suffix: windows_cpu_setup.exe
+  compute-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - id: set-matrix
+        shell: python
+        run: |
+          import json, os
+          
+          targets = [
+              {"os": "windows-latest", "var": "cpu", "req": "requirements-cpu.txt", "name": "windows_cpu_setup"},
+              {"os": "windows-latest", "var": "cuda", "req": "requirements-cuda.txt", "name": "windows_cuda_setup"},
+              {"os": "ubuntu-latest", "var": "cpu", "req": "requirements-cpu.txt", "name": "linux_cpu"},
+              {"os": "ubuntu-latest", "var": "cuda", "req": "requirements-cuda.txt", "name": "linux_cuda"}
+          ]
+          
+          mode = "${{ github.event.inputs.build_target }}"
+          ver = "${{ github.event.inputs.version }}"
+          
+          filtered = targets
+          if mode == 'CPU only':
+              filtered = [t for t in targets if t['var'] == 'cpu']
+          elif mode == 'CUDA only':
+              filtered = [t for t in targets if t['var'] == 'cuda']
+          
+          for t in filtered: t['ver'] = ver
+          
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+              f.write(f'matrix={json.dumps({"include": filtered})}\n')
 
-  build-windows-cuda:
-    if: inputs.build_target == 'CPU + CUDA' || inputs.build_target == 'CUDA only'
+  build:
+    needs: compute-matrix
+    strategy:
+      matrix: ${{ fromJson(needs.compute-matrix.outputs.matrix) }}
+      fail-fast: false
     uses: ./.github/workflows/build.yml
     with:
-      version: ${{ inputs.version }}
-      os: windows-latest
-      variant: cuda
-      requirements: requirements-cuda.txt
-      artifact_name: DuckAI_windows_cuda
-      installer_suffix: windows_cuda_setup.exe
-
-  build-linux-cpu:
-    if: inputs.build_target == 'CPU + CUDA' || inputs.build_target == 'CPU only'
-    uses: ./.github/workflows/build.yml
-    with:
-      version: ${{ inputs.version }}
-      os: ubuntu-latest
-      variant: cpu
-      requirements: requirements-cpu.txt
-      artifact_name: DuckAI_linux_cpu
-      installer_suffix: linux_cpu.deb
-
-  build-linux-cuda:
-    if: inputs.build_target == 'CPU + CUDA' || inputs.build_target == 'CUDA only'
-    uses: ./.github/workflows/build.yml
-    with:
-      version: ${{ inputs.version }}
-      os: ubuntu-latest
-      variant: cuda
-      requirements: requirements-cuda.txt
-      artifact_name: DuckAI_linux_cuda
-      installer_suffix: linux_cuda.deb
+      target_config: ${{ toJSON(matrix) }}
 
   release:
-    name: Create GitHub Release
+    needs: build
     runs-on: ubuntu-latest
-    needs: [build-windows-cpu, build-windows-cuda, build-linux-cpu, build-linux-cuda]
-    if: always()
-
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
     steps:
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v6
         with:
           path: artifacts/
           merge-multiple: true
 
-      - name: Create GitHub release
+      - name: Attest Build Provenance
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-path: 'artifacts/*'
+
+      - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ inputs.version }}
-          name: Duck AI v${{ inputs.version }}
-          draft: true
+          tag_name: v${{ github.event.inputs.version }}
+          name: Duck AI v${{ github.event.inputs.version }}
           files: artifacts/*
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          draft: true
+          generate_release_notes: true

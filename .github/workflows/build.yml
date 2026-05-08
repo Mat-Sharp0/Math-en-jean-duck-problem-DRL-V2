@@ -1,90 +1,61 @@
-name: Build
-
+name: Build Engine
 on:
   workflow_call:
     inputs:
-      version:
-        type: string
-        required: true
-      os:
-        type: string
-        required: true
-      variant:
-        type: string
-        required: true
-      requirements:
-        type: string
-        required: true
-      artifact_name:
-        type: string
-        required: true
-      installer_suffix:
+      target_config:
         type: string
         required: true
 
 jobs:
-  build:
-    runs-on: ${{ inputs.os }}
-
+  execute-build:
+    runs-on: ${{ fromJson(inputs.target_config).os }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
         with:
-          python-version: '3.14'
+          enable-cache: true
+          cache-dependency-glob: "requirements-*.txt"
 
-      - name: Install dependencies
-        run: pip install -r ${{ inputs.requirements }}
+      - name: Set up Python 3.14
+        run: uv python install 3.14
 
-      - name: Install PyInstaller
-        run: pip install pyinstaller
+      - name: Install Dependencies
+        run: |
+          uv pip install --system -r ${{ fromJson(inputs.target_config).req }}
+          uv pip install --system pyinstaller
 
-      - name: Inject version into app_info.py
-        run: sed -i "s/__version__ = \"dev\"/__version__ = \"${{ inputs.version }}\"/" src/utils/app_info.py
-        shell: bash
+      - name: Inject Version
+        shell: python
+        run: |
+          import os
+          v = "${{ fromJson(inputs.target_config).ver }}"
+          p = "src/utils/app_info.py"
+          content = open(p).read().replace('__version__ = "dev"', f'__version__ = "{v}"')
+          open(p, "w").write(content)
 
-      - name: Build with PyInstaller
-        run: pyinstaller build/DuckAI.spec --distpath build/dist
+      - name: PyInstaller Build
+        run: pyinstaller build/DuckAI.spec --distpath build/dist --noconfirm
 
-      - name: Build Inno Setup installer
+      - name: Inno Setup (Windows)
         if: runner.os == 'Windows'
-        run: iscc /DAppVersion=${{ inputs.version }} /DVariant=${{ inputs.variant }} build\installer.iss
         shell: cmd
+        run: |
+          iscc /DAppVersion=${{ fromJson(inputs.target_config).ver }} /DVariant=${{ fromJson(inputs.target_config).var }} build\installer.iss
+          move build\installer_output\DuckAI_Setup.exe DuckAI_${{ fromJson(inputs.target_config).name }}.exe
 
-      - name: Rename Windows installer
-        if: runner.os == 'Windows'
-        run: mv build/installer_output/DuckAI_Setup.exe build/installer_output/DuckAI_${{ inputs.version }}_${{ inputs.installer_suffix }}
-        shell: bash
-
-      - name: Create .deb package
+      - name: Create .deb (Linux)
         if: runner.os == 'Linux'
         run: |
-          mkdir -p deb_build/DEBIAN
-          mkdir -p deb_build/usr/share/duckai
-
+          mkdir -p deb_build/DEBIAN deb_build/usr/share/duckai
           cp -r build/deb/DEBIAN/* deb_build/DEBIAN/
-
-          sed -i 's/VERSION_PLACEHOLDER/${{ inputs.version }}/' deb_build/DEBIAN/control
-          sed -i 's/VARIANT_PLACEHOLDER/${{ inputs.variant }}/' deb_build/DEBIAN/postinst
-
-          chmod +x deb_build/DEBIAN/postinst
-
+          sed -i 's/VERSION_PLACEHOLDER/${{ fromJson(inputs.target_config).ver }}/' deb_build/DEBIAN/control
           cp -r build/dist/DuckAI/* deb_build/usr/share/duckai/
+          dpkg-deb --build deb_build DuckAI_${{ fromJson(inputs.target_config).name }}.deb
 
-          dpkg-deb --build deb_build DuckAI_${{ inputs.version }}_${{ inputs.installer_suffix }}
-
-      - name: Upload artifact (Windows)
-        if: runner.os == 'Windows'
-        uses: actions/upload-artifact@v4
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v6
         with:
-          name: ${{ inputs.artifact_name }}
-          path: build/installer_output/DuckAI_${{ inputs.version }}_${{ inputs.installer_suffix }}
-
-      - name: Upload artifact (Linux)
-        if: runner.os == 'Linux'
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ inputs.artifact_name }}
-          path: DuckAI_${{ inputs.version }}_${{ inputs.installer_suffix }}
+          name: ${{ fromJson(inputs.target_config).name }}
+          path: DuckAI_${{ fromJson(inputs.target_config).name }}.*

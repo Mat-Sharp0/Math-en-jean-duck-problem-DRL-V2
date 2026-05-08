@@ -1,6 +1,6 @@
 [project]
 name = "duck-ai"
-version = "1.0.1"
+version = "1.0.2"
 description = "Duck AI - Deep Reinforcement Learning"
 requires-python = ">=3.14.4"
 license = { file = "LICENSE" }

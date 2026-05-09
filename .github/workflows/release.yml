@@ -4,10 +4,10 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version (ex: 1.0.0)'
+        description: 'Version (e.g., 1.0.0)'
         required: true
       build_target:
-        description: 'Cible de build'
+        description: 'Build target'
         required: true
         type: choice
         options: ['ALL', 'CPU only', 'CUDA only']
@@ -22,25 +22,25 @@ jobs:
         shell: python
         run: |
           import json, os
-          
+
           targets = [
               {"os": "windows-latest", "var": "cpu", "req": "requirements-cpu.txt", "name": "windows_cpu_setup"},
               {"os": "windows-latest", "var": "cuda", "req": "requirements-cuda.txt", "name": "windows_cuda_setup"},
               {"os": "ubuntu-latest", "var": "cpu", "req": "requirements-cpu.txt", "name": "linux_cpu"},
               {"os": "ubuntu-latest", "var": "cuda", "req": "requirements-cuda.txt", "name": "linux_cuda"}
           ]
-          
+
           mode = "${{ github.event.inputs.build_target }}"
           ver = "${{ github.event.inputs.version }}"
-          
+
           filtered = targets
           if mode == 'CPU only':
               filtered = [t for t in targets if t['var'] == 'cpu']
           elif mode == 'CUDA only':
               filtered = [t for t in targets if t['var'] == 'cuda']
-          
+
           for t in filtered: t['ver'] = ver
-          
+
           with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
               f.write(f'matrix={json.dumps({"include": filtered})}\n')
 
@@ -61,13 +61,13 @@ jobs:
       id-token: write
       attestations: write
     steps:
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
         with:
           path: artifacts/
           merge-multiple: true
 
       - name: Attest Build Provenance
-        uses: actions/attest-build-provenance@v1
+        uses: actions/attest-build-provenance@v2
         with:
           subject-path: 'artifacts/*'
 
@@ -79,3 +79,5 @@ jobs:
           files: artifacts/*
           draft: true
           generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

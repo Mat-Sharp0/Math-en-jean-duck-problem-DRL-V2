@@ -1,4 +1,5 @@
 name: Build Engine
+
 on:
   workflow_call:
     inputs:
@@ -9,27 +10,39 @@ on:
 jobs:
   execute-build:
     runs-on: ${{ fromJson(inputs.target_config).os }}
+
     steps:
       - uses: actions/checkout@v6
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
         with:
           enable-cache: true
           cache-dependency-glob: "requirements-*.txt"
 
       - name: Set up Python 3.14
-        run: uv python install 3.14
+        run: uv python install 3.14.4
 
       - name: Install Dependencies
         run: |
-          uv pip install --system -r ${{ fromJson(inputs.target_config).req }}
-          uv pip install --system pyinstaller
+          uv venv --python 3.14.4 .venv
+          uv pip install -r ${{ fromJson(inputs.target_config).req }}
+          uv pip install pyinstaller
+        env:
+          VIRTUAL_ENV: ${{ github.workspace }}/.venv
+
+      - name: Add venv to PATH (Windows)
+        if: runner.os == 'Windows'
+        run: echo "${{ github.workspace }}\.venv\Scripts" >> $env:GITHUB_PATH
+        shell: pwsh
+
+      - name: Add venv to PATH (Linux)
+        if: runner.os == 'Linux'
+        run: echo "${{ github.workspace }}/.venv/bin" >> $GITHUB_PATH
 
       - name: Inject Version
         shell: python
         run: |
-          import os
           v = "${{ fromJson(inputs.target_config).ver }}"
           p = "src/utils/app_info.py"
           content = open(p).read().replace('__version__ = "dev"', f'__version__ = "{v}"')
@@ -51,11 +64,13 @@ jobs:
           mkdir -p deb_build/DEBIAN deb_build/usr/share/duckai
           cp -r build/deb/DEBIAN/* deb_build/DEBIAN/
           sed -i 's/VERSION_PLACEHOLDER/${{ fromJson(inputs.target_config).ver }}/' deb_build/DEBIAN/control
+          sed -i 's/VARIANT_PLACEHOLDER/${{ fromJson(inputs.target_config).var }}/' deb_build/DEBIAN/postinst
+          chmod +x deb_build/DEBIAN/postinst
           cp -r build/dist/DuckAI/* deb_build/usr/share/duckai/
           dpkg-deb --build deb_build DuckAI_${{ fromJson(inputs.target_config).name }}.deb
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ fromJson(inputs.target_config).name }}
           path: DuckAI_${{ fromJson(inputs.target_config).name }}.*

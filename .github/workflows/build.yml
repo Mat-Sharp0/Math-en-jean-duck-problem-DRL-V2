@@ -26,7 +26,7 @@ jobs:
       - name: Install Dependencies
         run: |
           uv venv --python 3.14.4 .venv
-          uv pip install -r ${{ fromJson(inputs.target_config).req }}
+          uv pip install --index-strategy unsafe-best-match -r ${{ fromJson(inputs.target_config).req }}
           uv pip install pyinstaller
         env:
           VIRTUAL_ENV: ${{ github.workspace }}/.venv
@@ -48,8 +48,14 @@ jobs:
           content = open(p).read().replace('__version__ = "dev"', f'__version__ = "{v}"')
           open(p, "w").write(content)
 
-      - name: PyInstaller Build
-        run: pyinstaller build/DuckAI.spec --distpath build/dist --noconfirm
+      - name: PyInstaller Build (Windows)
+        if: runner.os == 'Windows'
+        run: .venv\Scripts\python.exe -m PyInstaller build/DuckAI.spec --distpath build/dist --noconfirm
+        shell: pwsh
+
+      - name: PyInstaller Build (Linux)
+        if: runner.os == 'Linux'
+        run: .venv/bin/python -m PyInstaller build/DuckAI.spec --distpath build/dist --noconfirm
 
       - name: Inno Setup (Windows)
         if: runner.os == 'Windows'

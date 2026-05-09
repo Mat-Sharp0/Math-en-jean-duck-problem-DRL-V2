@@ -53,6 +53,10 @@ jobs:
         run: .venv\Scripts\python.exe -m PyInstaller build/DuckAI.spec --distpath build/dist --noconfirm
         shell: pwsh
 
+      - name: Install UPX (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get install -y upx-ucl
+
       - name: PyInstaller Build (Linux)
         if: runner.os == 'Linux'
         run: .venv/bin/python -m PyInstaller build/DuckAI.spec --distpath build/dist --noconfirm

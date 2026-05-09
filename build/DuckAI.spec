@@ -1,6 +1,8 @@
 # -*- mode: python ; coding: utf-8 -*-
 from PyInstaller.utils.hooks import collect_data_files, collect_dynamic_libs
 import stable_baselines3, gymnasium, os
+import sys
+use_upx = sys.platform.startswith('linux')
 
 block_cipher = None
 
@@ -83,7 +85,7 @@ exe = EXE(
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
-    upx=False,
+    upx=use_upx,
     console=True,
     disable_windowed_traceback=False,
     target_arch=None,
@@ -97,8 +99,20 @@ coll = COLLECT(
     a.zipfiles,
     a.datas,
     strip=False,
-    upx=False,
-    upx_exclude=[],
+    upx=use_upx,
+    upx_exclude=[
+        'torch_cuda*.so',
+        'torch_cuda*.dll',
+        'libcuda*.so',
+        'cudnn*.so',
+        'cublas*.so',
+        'cufft*.so',
+        'curand*.so',
+        'cusolver*.so',
+        'cusparse*.so',
+        'nccl*.so',
+        'python3*.so',
+    ],
     name='DuckAI',
     distpath='build/dist',
 )

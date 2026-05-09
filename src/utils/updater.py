@@ -51,7 +51,7 @@ def check_for_update(console: Console) -> None:
         if sys.platform == "win32":
             asset_name = f"DuckAI_{latest_tag}_windows_{variant}_setup.exe"
         else:
-            asset_name = f"DuckAI_{latest_tag}_linux_{variant}_setup.deb"
+            asset_name = f"DuckAI_{latest_tag}_linux_{variant}_setup.sh"
 
         assets = release.get("assets", [])
         asset = next((a for a in assets if a["name"] == asset_name), None)
@@ -90,8 +90,8 @@ def check_for_update(console: Console) -> None:
             if sys.platform == "win32":
                 subprocess.Popen([str(installer_path), "/SILENT", "/SUPPRESSMSGBOXES"])
             else:
-                console.print("[yellow]A password may be required to install the .deb package[/]")
-                subprocess.Popen(["pkexec", "dpkg", "-i", str(installer_path)])
+                os.chmod(installer_path, 0o755)
+                subprocess.Popen(["bash", str(installer_path)])
                 
             console.print("[bold green]The installer has started. Duck AI will now close[/]")
             sys.exit(0)

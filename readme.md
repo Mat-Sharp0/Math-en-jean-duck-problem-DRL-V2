@@ -36,12 +36,13 @@ Exécuter l'installeur téléchargé et suivre les étapes à l'écran.
 **Linux :**
 
 Télécharger la dernière release correspondant à votre configuration :
-- `DuckAI_x.x.x_linux_cpu.deb` — version CPU
-- `DuckAI_x.x.x_linux_cuda.deb` — version GPU NVIDIA
+- `DuckAI_x.x.x_linux_cpu_setup.sh` — version CPU
+- `DuckAI_x.x.x_linux_cuda_setup.sh` — version GPU NVIDIA
 
-Installer le paquet :
+Rendre le fichier exécutable et lancer l'installation :
 ```bash
-sudo dpkg -i DuckAI_x.x.x_linux_cpu.deb
+chmod +x DuckAI_x.x.x_linux_cpu_setup.sh
+./DuckAI_x.x.x_linux_cpu_setup.sh
 ```
 
 #### From Source

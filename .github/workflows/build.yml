@@ -57,23 +57,32 @@ jobs:
         if: runner.os == 'Linux'
         run: .venv/bin/python -m PyInstaller build/DuckAI.spec --distpath build/dist --noconfirm
 
-      - name: Inno Setup (Windows)
+      - name: Build Inno Setup installer (Windows)
         if: runner.os == 'Windows'
         shell: cmd
         run: |
-          iscc /DAppVersion=${{ fromJson(inputs.target_config).ver }} /DVariant=${{ fromJson(inputs.target_config).var }} build\installer.iss
+          iscc /DAppVersion=${{ fromJson(inputs.target_config).ver }} /DVariant=${{ fromJson(inputs.target_config).var }} build\installer_windows.iss
           move build\installer_output\DuckAI_Setup.exe DuckAI_${{ fromJson(inputs.target_config).ver }}_${{ fromJson(inputs.target_config).name }}.exe
 
-      - name: Create .deb (Linux)
+      - name: Install makeself (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get install -y makeself
+
+      - name: Build makeself installer (Linux)
         if: runner.os == 'Linux'
         run: |
-          mkdir -p deb_build/DEBIAN deb_build/usr/share/duckai
-          cp -r build/deb/DEBIAN/* deb_build/DEBIAN/
-          sed -i 's/VERSION_PLACEHOLDER/${{ fromJson(inputs.target_config).ver }}/' deb_build/DEBIAN/control
-          sed -i 's/VARIANT_PLACEHOLDER/${{ fromJson(inputs.target_config).var }}/' deb_build/DEBIAN/postinst
-          chmod +x deb_build/DEBIAN/postinst
-          cp -r build/dist/DuckAI/* deb_build/usr/share/duckai/
-          dpkg-deb -Zxz -z9 --build deb_build DuckAI_${{ fromJson(inputs.target_config).ver }}_${{ fromJson(inputs.target_config).name }}.deb
+          mkdir -p makeself_dir
+          cp -r build/dist/DuckAI/* makeself_dir/
+          cp build/installer_linux.sh makeself_dir/
+
+          sed -i 's/VARIANT_PLACEHOLDER/${{ fromJson(inputs.target_config).var }}/' makeself_dir/installer_linux.sh
+          sed -i 's/VERSION_PLACEHOLDER/${{ fromJson(inputs.target_config).ver }}/' makeself_dir/installer_linux.sh
+          chmod +x makeself_dir/installer_linux.sh
+
+          makeself --xz makeself_dir \
+            DuckAI_${{ fromJson(inputs.target_config).ver }}_${{ fromJson(inputs.target_config).name }}.sh \
+            "Duck AI Installer" \
+            ./installer_linux.sh
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v7

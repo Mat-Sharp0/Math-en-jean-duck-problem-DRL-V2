@@ -4,9 +4,14 @@
 **/*.pyc
 **/*.pyo
 
-user_content/config/
-user_content/logs/
-user_content/models/
+user_content/*
+user_content/config/*
+user_content/logs/*
+user_content/models/*
+
+!user_content/config/
+!user_content/logs/
+!user_content/models/
 
 build/dist/
-build/installer_output/
+build/installer_output/*

@@ -62,7 +62,7 @@ jobs:
         shell: cmd
         run: |
           iscc /DAppVersion=${{ fromJson(inputs.target_config).ver }} /DVariant=${{ fromJson(inputs.target_config).var }} build\installer.iss
-          move build\installer_output\DuckAI_Setup.exe DuckAI_${{ fromJson(inputs.target_config).name }}.exe
+          move build\installer_output\DuckAI_Setup.exe DuckAI_${{ fromJson(inputs.target_config).ver }}_${{ fromJson(inputs.target_config).name }}.exe
 
       - name: Create .deb (Linux)
         if: runner.os == 'Linux'
@@ -73,10 +73,10 @@ jobs:
           sed -i 's/VARIANT_PLACEHOLDER/${{ fromJson(inputs.target_config).var }}/' deb_build/DEBIAN/postinst
           chmod +x deb_build/DEBIAN/postinst
           cp -r build/dist/DuckAI/* deb_build/usr/share/duckai/
-          dpkg-deb --build deb_build DuckAI_${{ fromJson(inputs.target_config).name }}.deb
+          dpkg-deb -Zxz -z9 --build deb_build DuckAI_${{ fromJson(inputs.target_config).ver }}_${{ fromJson(inputs.target_config).name }}.deb
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v7
         with:
           name: ${{ fromJson(inputs.target_config).name }}
-          path: DuckAI_${{ fromJson(inputs.target_config).name }}.*
+          path: DuckAI_${{ fromJson(inputs.target_config).ver }}_${{ fromJson(inputs.target_config).name }}.*

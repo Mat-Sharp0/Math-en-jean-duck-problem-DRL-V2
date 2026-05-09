@@ -49,10 +49,9 @@ def check_for_update(console: Console) -> None:
             pass
 
         if sys.platform == "win32":
-
             asset_name = f"DuckAI_{latest_tag}_windows_{variant}_setup.exe"
         else:
-            asset_name = f"DuckAI_{latest_tag}_linux_{variant}.deb"
+            asset_name = f"DuckAI_{latest_tag}_linux_{variant}_setup.deb"
 
         assets = release.get("assets", [])
         asset = next((a for a in assets if a["name"] == asset_name), None)

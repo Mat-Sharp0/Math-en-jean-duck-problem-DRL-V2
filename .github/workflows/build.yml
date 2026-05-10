@@ -61,6 +61,10 @@ jobs:
         if: runner.os == 'Linux'
         run: .venv/bin/python -m PyInstaller build/DuckAI.spec --distpath build/dist --noconfirm
 
+      - name: Check build size
+        if: runner.os == 'Linux'
+        run: du -sh build/dist/DuckAI/
+
       - name: Build Inno Setup installer (Windows)
         if: runner.os == 'Windows'
         shell: cmd

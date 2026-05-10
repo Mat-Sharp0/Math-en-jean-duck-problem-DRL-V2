@@ -1,10 +1,10 @@
 # -*- mode: python ; coding: utf-8 -*-
 from PyInstaller.utils.hooks import collect_data_files, collect_dynamic_libs
-import stable_baselines3, gymnasium, os
-import sys
-use_upx = sys.platform.startswith('linux')
+import stable_baselines3, gymnasium, os, sys
 
 block_cipher = None
+
+do_strip = sys.platform.startswith('linux')
 
 sb3_datas = collect_data_files('stable_baselines3')
 gym_datas  = collect_data_files('gymnasium')
@@ -84,8 +84,8 @@ exe = EXE(
     name='DuckAI',
     debug=False,
     bootloader_ignore_signals=False,
-    strip=False,
-    upx=use_upx,
+    strip=do_strip,
+    upx=False,
     console=True,
     disable_windowed_traceback=False,
     target_arch=None,
@@ -98,21 +98,9 @@ coll = COLLECT(
     a.binaries,
     a.zipfiles,
     a.datas,
-    strip=False,
-    upx=use_upx,
-    upx_exclude=[
-        'torch_cuda*.so',
-        'torch_cuda*.dll',
-        'libcuda*.so',
-        'cudnn*.so',
-        'cublas*.so',
-        'cufft*.so',
-        'curand*.so',
-        'cusolver*.so',
-        'cusparse*.so',
-        'nccl*.so',
-        'python3*.so',
-    ],
+    strip=do_strip,
+    upx=False,
+    upx_exclude=[],
     name='DuckAI',
     distpath='build/dist',
 )

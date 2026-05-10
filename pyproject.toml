@@ -2,7 +2,7 @@
 name = "duck-ai"
 version = "1.0.3"
 description = "Duck AI - Deep Reinforcement Learning"
-requires-python = ">=3.14.4"
+requires-python = ">=3.14"
 license = { file = "LICENSE" }
 
 [build-system]

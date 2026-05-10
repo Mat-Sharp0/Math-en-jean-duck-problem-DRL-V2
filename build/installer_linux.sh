@@ -17,11 +17,12 @@ mkdir -p "$REAL_HOME/.local/share/applications"
 cat > "$REAL_HOME/.local/share/applications/duckai.desktop" << EOF
 [Desktop Entry]
 Name=Duck AI
-Exec=$REAL_HOME/.local/bin/DuckAI/DuckAI
+Exec=bash -c "$REAL_HOME/.local/bin/DuckAI/DuckAI; read -p 'Press Enter to close...'"
 Icon=utilities-terminal
 Type=Application
 Categories=Science;Education;
 Comment=Deep Reinforcement Learning simulation
+Terminal=true
 EOF
 chown "$REAL_USER:$REAL_USER" "$REAL_HOME/.local/share/applications/duckai.desktop"
 

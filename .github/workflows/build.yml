@@ -48,13 +48,15 @@ jobs:
           content = open(p).read().replace('__version__ = "dev"', f'__version__ = "{v}"')
           open(p, "w").write(content)
 
-      - name: Check Tcl/Tk in venv (Linux)
+      - name: Install Tcl/Tk 9.0 (Linux)
         if: runner.os == 'Linux'
         run: |
-          find .venv -name "libtcl*.so*" 2>/dev/null
-          find .venv -name "libtk*.so*" 2>/dev/null
-          find /opt/hostedtoolcache -name "libtcl*.so*" 2>/dev/null
-          find /opt/hostedtoolcache -name "libtk*.so*" 2>/dev/null
+          sudo apt-get update
+          sudo apt-get install -y tcl9.0 tk9.0 tcl9.0-dev tk9.0-dev
+
+      - name: Check Tcl/Tk 9.0 (Linux)
+        if: runner.os == 'Linux'
+        run: find /usr -name "libtcl9*.so*" 2>/dev/null
 
       - name: PyInstaller Build (Windows)
         if: runner.os == 'Windows'

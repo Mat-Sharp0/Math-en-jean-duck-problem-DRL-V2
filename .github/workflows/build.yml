@@ -48,12 +48,13 @@ jobs:
           content = open(p).read().replace('__version__ = "dev"', f'__version__ = "{v}"')
           open(p, "w").write(content)
 
-      - name: Check Tcl/Tk (Linux)
+      - name: Check Tcl/Tk in venv (Linux)
         if: runner.os == 'Linux'
         run: |
-          find /usr -name "libtcl*.so*" 2>/dev/null
-          find /usr -name "libtk*.so*" 2>/dev/null
-          python3 -c "import tkinter; print(tkinter.TclVersion)"
+          find .venv -name "libtcl*.so*" 2>/dev/null
+          find .venv -name "libtk*.so*" 2>/dev/null
+          find /opt/hostedtoolcache -name "libtcl*.so*" 2>/dev/null
+          find /opt/hostedtoolcache -name "libtk*.so*" 2>/dev/null
 
       - name: PyInstaller Build (Windows)
         if: runner.os == 'Windows'

@@ -48,16 +48,6 @@ jobs:
           content = open(p).read().replace('__version__ = "dev"', f'__version__ = "{v}"')
           open(p, "w").write(content)
 
-      - name: Install Tcl/Tk 9.0 (Linux)
-        if: runner.os == 'Linux'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y tcl9.0 tk9.0 tcl9.0-dev tk9.0-dev
-
-      - name: Check Tcl/Tk 9.0 (Linux)
-        if: runner.os == 'Linux'
-        run: find /usr -name "libtcl9*.so*" 2>/dev/null
-
       - name: PyInstaller Build (Windows)
         if: runner.os == 'Windows'
         run: .venv\Scripts\python.exe -m PyInstaller build/DuckAI.spec --distpath build/dist --noconfirm

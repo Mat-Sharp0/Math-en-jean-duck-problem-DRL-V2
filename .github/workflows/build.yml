@@ -48,21 +48,23 @@ jobs:
           content = open(p).read().replace('__version__ = "dev"', f'__version__ = "{v}"')
           open(p, "w").write(content)
 
+      - name: Check Tcl/Tk (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          find /usr -name "libtcl*.so*" 2>/dev/null
+          find /usr -name "libtk*.so*" 2>/dev/null
+          python3 -c "import tkinter; print(tkinter.TclVersion)"
+
       - name: PyInstaller Build (Windows)
         if: runner.os == 'Windows'
         run: .venv\Scripts\python.exe -m PyInstaller build/DuckAI.spec --distpath build/dist --noconfirm
         shell: pwsh
-
-      - name: Install UPX (Linux)
-        if: runner.os == 'Linux'
-        run: sudo apt-get install -y upx-ucl
 
       - name: PyInstaller Build (Linux)
         if: runner.os == 'Linux'
         run: .venv/bin/python -m PyInstaller build/DuckAI.spec --distpath build/dist --noconfirm
 
       - name: Check build size
-        if: runner.os == 'Linux'
         run: du -sh build/dist/DuckAI/
 
       - name: Build Inno Setup installer (Windows)
@@ -79,6 +81,8 @@ jobs:
       - name: Build makeself installer (Linux)
         if: runner.os == 'Linux'
         run: |
+          export XZ_OPT="-9 --lzma2=dict=64MiB,mf=bt4,nice=273,depth=200"
+
           mkdir -p makeself_dir
           cp -r build/dist/DuckAI/* makeself_dir/
           cp build/installer_linux.sh makeself_dir/

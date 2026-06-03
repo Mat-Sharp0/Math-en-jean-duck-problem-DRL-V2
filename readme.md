@@ -11,8 +11,11 @@ DuckAI est un logiciel permettant d'entraîner et de visualiser des IA dans le b
 ### Dependencies
 
 #### Standalone installer
-* Windows 10/11 ou distribution Linux avec prise en charge de `.deb`
+* Windows 10/11 ~~ou distribution Linux avec prise en charge de `.deb`~~
 * Avec CUDA : GPU NVIDIA avec prise en charge de CUDA 13.0
+
+> [!WARNING]
+> Les builds Linux standalone ne fonctionnent pas actuellement. Veuillez cloner le dépôt à la place.
 
 #### From Source
 * Git

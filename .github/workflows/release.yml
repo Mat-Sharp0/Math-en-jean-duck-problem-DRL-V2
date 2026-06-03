@@ -26,8 +26,8 @@ jobs:
           targets = [
               {"os": "windows-latest", "var": "cpu", "req": "requirements-cpu.txt", "name": "windows_cpu_setup"},
               {"os": "windows-latest", "var": "cuda", "req": "requirements-cuda.txt", "name": "windows_cuda_setup"},
-              {"os": "ubuntu-latest",  "var": "cpu", "req": "requirements-cpu.txt", "name": "linux_cpu_setup"},
-              {"os": "ubuntu-latest",  "var": "cuda", "req": "requirements-cuda.txt", "name": "linux_cuda_setup"}
+              # {"os": "ubuntu-latest",  "var": "cpu", "req": "requirements-cpu.txt", "name": "linux_cpu_setup"},
+              # {"os": "ubuntu-latest",  "var": "cuda", "req": "requirements-cuda.txt", "name": "linux_cuda_setup"}
           ]
 
           mode = "${{ github.event.inputs.build_target }}"

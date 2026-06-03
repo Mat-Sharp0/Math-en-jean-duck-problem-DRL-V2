@@ -35,15 +35,23 @@ Exécuter l'installeur téléchargé et suivre les étapes à l'écran.
 
 **Linux :**
 
+<del>
+
 Télécharger la dernière release correspondant à votre configuration :
 - `DuckAI_x.x.x_linux_cpu_setup.sh` — version CPU
 - `DuckAI_x.x.x_linux_cuda_setup.sh` — version GPU NVIDIA
 
 Rendre le fichier exécutable et lancer l'installation :
+
 ```bash
 chmod +x DuckAI_x.x.x_linux_cpu_setup.sh
 ./DuckAI_x.x.x_linux_cpu_setup.sh
 ```
+
+</del>
+
+> [!WARNING]
+> Les builds Linux standalone ne fonctionnent pas actuellement. Veuillez cloner le dépôt à la place.
 
 #### From Source
 

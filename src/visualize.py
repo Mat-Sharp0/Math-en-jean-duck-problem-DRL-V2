@@ -12,11 +12,11 @@ def visualize(console:Console, model_path:str, wolf_speed:float = 3.0, episodes:
             meta = json.load(f)
 
     if meta['algo'] == 'PPO':
-        model = PPO.load(model_path)
+        model = PPO.load(model_path, device = "auto")
     elif meta['algo'] == 'TD3':
-        model = TD3.load(model_path)
+        model = TD3.load(model_path, device = "auto")
     elif meta['algo'] == 'SAC':
-        model = SAC.load(model_path)
+        model = SAC.load(model_path, device = "auto")
     else:
         raise ValueError(f"Unsupported algorithm: {meta['algo']}")
 

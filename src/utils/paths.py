@@ -51,8 +51,14 @@ def _copy_examples(source_dir: Path, dest_dir: Path, exclude: set[str] = {}) -> 
             continue
         dest = dest_dir / source.name
         if not dest.exists():
-            shutil.copy(source, dest)
-            dest.chmod(stat.S_IREAD | stat.S_IRGRP | stat.S_IROTH)
+            if source.is_dir():
+                shutil.copytree(source, dest)
+                for root, dirs, files in os.walk(dest):
+                    for momo in dirs + files:
+                        os.chmod(os.path.join(root, momo), stat.S_IREAD | stat.S_IRGRP | stat.S_IROTH)
+            else:
+                shutil.copy(source, dest)
+                dest.chmod(stat.S_IREAD | stat.S_IRGRP | stat.S_IROTH)
 
 def init_content_dirs() -> None:
     """Build user_content directory"""

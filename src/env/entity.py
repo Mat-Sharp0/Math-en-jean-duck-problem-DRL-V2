@@ -23,7 +23,7 @@ class Duck:
 
         new_pos = self.pos + direction * distance
 
-        self.pos = np.clip(np.linalg.norm(new_pos), 0, radius) / np.linalg.norm(new_pos) * new_pos if np.linalg.norm(new_pos) > 0 else new_pos
+        self.pos = np.clip(np.linalg.norm(new_pos), 0, radius + 0.05) / np.linalg.norm(new_pos) * new_pos if np.linalg.norm(new_pos) > 0 else new_pos
 
 
 class Wolf:

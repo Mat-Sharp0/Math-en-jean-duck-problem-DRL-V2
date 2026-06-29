@@ -60,8 +60,28 @@ while True:
         if not config:
             console.print ("No config file selected")
         else:
+            load_model_path = None
+            choice = Prompt.ask(prompt="1. Training from scratch\n2. Continue training from existing model (Curriculum Learning)\n", console=console, choices=["1", "2"])
+            if choice == "2":
+                root = tk.Tk()
+                root.withdraw()
+                selected_model = filedialog.askopenfilename(
+                    title="Choose model checkpoint",
+                    initialdir=MODELS_DIR,
+                    filetypes=[
+                        ("ZIP file", "*.zip"),
+                        ("All file", "*.*")
+                    ]
+                )
+                root.destroy()
+                
+                if selected_model:
+                    load_model_path = Path(selected_model)
+                else:
+                    console.print("No model selected, training will start from scratch.")
+
             try:
-                train_model(Path(config))
+                train_model(Path(config), load_model_path)
             except OSError as err:
                 console.print("OS error:", err)
             except ValueError:

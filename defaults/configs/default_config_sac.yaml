@@ -1,5 +1,5 @@
 meta:
-  run_name: "default_sac"
+  run_name: "sac_easy"
   version: "1.0.0"
 
 algo: SAC
@@ -10,9 +10,9 @@ render_mode: null
 env:
   duck_speed: 1.0
   wolf_speed: 3.0
-
+  
 training:
-  n_envs: 1
+  n_envs: 8
   total_timesteps: 1_000_000
   save_freq: 50_000
 
@@ -21,10 +21,10 @@ log:
 
 hyperparameters:
   learning_rate: 0.0003
-  batch_size: 256
+  batch_size: 1024
   gamma: 0.99
   tau: 0.005
-  ent_coef: auto
+  ent_coef: 'auto'
   target_entropy: auto
   learning_starts: 10000
   buffer_size: 500000

@@ -4,15 +4,27 @@ from datetime import datetime
 from pathlib import Path
 
 from src.utils.paths import TENSORBOARD_DIR, MODELS_DIR
+from src.env.environment import Environment
 
 import numpy as np
 
 from stable_baselines3 import PPO, TD3, SAC
 from stable_baselines3.common.noise import NormalActionNoise
 from stable_baselines3.common.callbacks import CheckpointCallback
+from stable_baselines3.common.vec_env import SubprocVecEnv, VecMonitor
 
-from src.env.environment import Environment
+
 import gymnasium as gym
+
+def make_env(config, hp):
+    def _init():
+        return Environment(
+            render_mode=config['render_mode'],
+            duck_speed=config['env']['duck_speed'],
+            wolf_speed=config['env']['wolf_speed'],
+            reward_scale=hp.get('reward_scale', 1.0)
+        )
+    return _init
 
 def train_model(yaml_config_path: Path, load_model_path: Path = None) -> Path:
     """
@@ -28,12 +40,9 @@ def train_model(yaml_config_path: Path, load_model_path: Path = None) -> Path:
 
     hp = config['hyperparameters']
 
-    env = Environment(
-        render_mode=config['render_mode'],
-        duck_speed=config['env']['duck_speed'],
-        wolf_speed=config['env']['wolf_speed'],
-        reward_scale=hp.get('reward_scale', 1.0)
-    )
+    num_cpu = config['training'].get('n_envs', 8)
+    raw_env = SubprocVecEnv([make_env(config, hp) for _ in range(num_cpu)])
+    env = VecMonitor(raw_env)
 
     run_name = config['meta']['run_name']
     checkpoint_dir = MODELS_DIR / run_name / "checkpoints"

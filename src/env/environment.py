@@ -77,37 +77,45 @@ class Environment(gym.Env):
         terminated = False
         truncated = False
         
-        reward = -0.01 * self.reward_scale
+        old_duck_dist = np.linalg.norm(self.duck.pos)
+        old_wolf_dist = np.linalg.norm(self.duck.pos - self.wolf.pos)
+
+        reward = -0.05 * self.reward_scale
 
         action = np.clip(action, -1.0, 1.0)
         action = action * self.duck_speed
 
         self.duck.move(ax=action[0], ay=action[1], max_distance=self.duck_speed, radius=self.radius)
-        self.wolf.wolf_move(
-            self.duck.pos, np.zeros(2), self.wolf_speed
-        )
+        self.wolf.wolf_move(self.duck.pos, np.zeros(2), self.wolf_speed)
 
         info = self._get_info()
 
         duck_dist = np.linalg.norm(self.duck.pos)
         wolf_dist = np.linalg.norm(self.duck.pos - self.wolf.pos)
 
-        danger_zone = self.catch_radius + (3 * self.wolf_speed) #Changer 3 si besoin
-        if wolf_dist < danger_zone:
-            reward -= 0.05 * (danger_zone - wolf_dist) * self.reward_scale
+        dist_gain = duck_dist - old_duck_dist
+        reward += dist_gain * 1.5 * self.reward_scale 
 
-        if duck_dist >= self.radius:
+        survival_gain = wolf_dist - old_wolf_dist
+        reward += survival_gain * 1.0 * self.reward_scale
+
+        danger_zone = self.catch_radius + (2.5 * self.wolf_speed)
+        if wolf_dist < danger_zone:
+            reward -= 0.02 * (danger_zone - wolf_dist) * self.reward_scale
+
+        if wolf_dist <= self.catch_radius:
             terminated = True
-            if wolf_dist > self.catch_radius:
-                reward += 5.0 * self.reward_scale
-                info["result"] = "win"
-            else:
-                reward -= 2.0 * self.reward_scale
-                info["result"] = "lose"
+            reward -= 20.0 * self.reward_scale 
+            info["result"] = "lose"
+
+        elif duck_dist >= self.radius:
+            terminated = True
+            reward += 15.0 * self.reward_scale
+            info["result"] = "win"
 
         elif self.steps >= self.max_steps:
             truncated = True
-            reward -= 5.0 * self.reward_scale
+            reward -= 10.0 * self.reward_scale
             info["result"] = "timeout"
 
         observation = self._get_obs()

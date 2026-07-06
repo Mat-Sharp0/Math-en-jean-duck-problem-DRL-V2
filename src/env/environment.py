@@ -16,7 +16,7 @@ class Environment(gym.Env):
         radius: float = 100.0,
         duck_speed: float = 1.0,
         wolf_speed: float = 4.1,
-        catch_radius: float = 0.1,
+        catch_radius: float = 0.0001,
         max_steps: int = 500,
         reward_scale: float = 1.0,
     ):
@@ -32,8 +32,10 @@ class Environment(gym.Env):
         self.duck = Duck()
         self.wolf = Wolf(np.array([0.0, -self.radius], dtype=np.float64))
 
-        self.observation_space = spaces.Box(low=-1.0, high=1.0, shape=(4,), dtype=np.float32)
+        self.duck_trajectory = []
+        self.wolf_trajectory = []
 
+        self.observation_space = spaces.Box(low=-1.0, high=1.0, shape=(4,), dtype=np.float32)
 
         self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2,), dtype=np.float32)
 
@@ -62,6 +64,13 @@ class Environment(gym.Env):
         self.duck.pos = np.zeros(2, dtype=np.float32)
         theta=self.np_random.random(dtype=np.float64) * 2 * np.pi
         self.wolf.pos = np.array([np.cos(theta) * self.radius, np.sin(theta) * self.radius], dtype=np.float64)
+        
+        if self.render_mode is not None:
+            self.duck_trajectory = [self.duck.pos.copy()]
+            self.wolf_trajectory = [self.wolf.pos.copy()]
+        else:
+            self.duck_trajectory = []
+            self.wolf_trajectory = []
 
         observation = self._get_obs()
         info = self._get_info()
@@ -76,6 +85,9 @@ class Environment(gym.Env):
 
         terminated = False
         truncated = False
+
+        old_duck_pos = self.duck.pos.copy()
+        old_wolf_pos = self.wolf.pos.copy()
         
         old_duck_dist = np.linalg.norm(self.duck.pos)
         old_wolf_dist = np.linalg.norm(self.duck.pos - self.wolf.pos)
@@ -88,30 +100,43 @@ class Environment(gym.Env):
         self.duck.move(ax=action[0], ay=action[1], max_distance=self.duck_speed, radius=self.radius)
         self.wolf.wolf_move(self.duck.pos, np.zeros(2), self.wolf_speed)
 
+        if self.render_mode is not None:
+            self.duck_trajectory.append(self.duck.pos.copy())
+            self.wolf_trajectory.append(self.wolf.pos.copy())
+
         info = self._get_info()
 
         duck_dist = np.linalg.norm(self.duck.pos)
         wolf_dist = np.linalg.norm(self.duck.pos - self.wolf.pos)
 
-        dist_gain = duck_dist - old_duck_dist
-        reward += dist_gain * 1.5 * self.reward_scale 
+        duck_move_dist = duck_dist - old_duck_dist
+        reward += duck_move_dist * 1.5 * self.reward_scale 
 
-        survival_gain = wolf_dist - old_wolf_dist
-        reward += survival_gain * 1.0 * self.reward_scale
+        wolf_move_dist = wolf_dist - old_wolf_dist
+        reward += wolf_move_dist * 1.0 * self.reward_scale
 
         danger_zone = self.catch_radius + (2.5 * self.wolf_speed)
         if wolf_dist < danger_zone:
             reward -= 0.02 * (danger_zone - wolf_dist) * self.reward_scale
 
-        if wolf_dist <= self.catch_radius:
+        if duck_dist >= self.radius:
             terminated = True
-            reward -= 20.0 * self.reward_scale 
-            info["result"] = "lose"
 
-        elif duck_dist >= self.radius:
-            terminated = True
-            reward += 15.0 * self.reward_scale
-            info["result"] = "win"
+            impact_on_move = (self.radius - old_duck_dist) / duck_move_dist if duck_move_dist > 1e-6 else 1.0 #Impact percentage of the move
+
+            if np.linalg.norm(
+                        (old_duck_pos + impact_on_move * (self.duck.pos - old_duck_pos)) - 
+                        (old_wolf_pos + impact_on_move * (self.wolf.pos - old_wolf_pos))
+                    ) <= self.catch_radius:
+                
+                terminated = True
+                reward -= 20.0 * self.reward_scale 
+                info["result"] = "lose"
+            else:
+                terminated = True
+                reward += 15.0 * self.reward_scale
+                info["result"] = "win"
+                
 
         elif self.steps >= self.max_steps:
             truncated = True
@@ -149,6 +174,12 @@ class Environment(gym.Env):
             return (pos * scale + center).astype(int)
 
         pygame.draw.circle(canvas, (0, 0, 0), (center, center), int(self.radius * scale), 2)
+        if len(self.duck_trajectory) > 1:
+            sreen_points = [to_screen(p) for p in self.duck_trajectory]
+            pygame.draw.lines(canvas, (0, 180, 255), False, sreen_points, 2)
+        if len(self.wolf_trajectory) > 1:
+            sreen_points = [to_screen(p) for p in self.wolf_trajectory]
+            pygame.draw.lines(canvas, (255, 50, 50), False, sreen_points, 2)
         pygame.draw.circle(canvas, (255, 0, 0), to_screen(self.wolf.pos), 8)
         pygame.draw.circle(canvas, (0, 0, 255), to_screen(self.duck.pos), 8)
 

@@ -1,4 +1,3 @@
-# Update value here, in installer.iss and in DuckAI.spec
 import sys
 import tomllib
 from src.utils.paths import RESOURCE_DIR

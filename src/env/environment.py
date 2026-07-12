@@ -16,7 +16,7 @@ class Environment(gym.Env):
         radius: float = 100.0,
         duck_speed: float = 1.0,
         wolf_speed: float = 4.1,
-        catch_radius: float = 0.0001,
+        catch_radius: float = 0.001,
         max_steps: int = 500,
         reward_scale: float = 1.0,
     ):
